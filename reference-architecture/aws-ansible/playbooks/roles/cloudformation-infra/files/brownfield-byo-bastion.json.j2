@@ -578,6 +578,7 @@
             "Protocol": "TCP"
           }
         ],
+        "Scheme": "internal",
         "SecurityGroups": [{"Ref": "MasterExtElbSG"}],
         "Subnets": [
           {"Ref": "PublicSubnet1"},
@@ -617,6 +618,7 @@
             "Protocol": "TCP"
           }
         ],
+        "Scheme": "internal",
         "SecurityGroups": [ { "Ref": "InfraElbSG" } ],
         "Subnets": [
           {"Ref": "PublicSubnet1"},
@@ -751,7 +753,7 @@
             "Type": "A",
             "AliasTarget": {
                 "HostedZoneId": { "Fn::GetAtt" : ["MasterExtElb", "CanonicalHostedZoneNameID"] },
-                "DNSName": { "Fn::GetAtt" : ["MasterExtElb","CanonicalHostedZoneName"] }
+                "DNSName": { "Fn::GetAtt" : ["MasterExtElb","DNSName"] }
             }
           },
           {
@@ -767,7 +769,7 @@
             "Type": "A",
             "AliasTarget": {
                 "HostedZoneId": { "Fn::GetAtt" : ["InfraElb", "CanonicalHostedZoneNameID"] },
-                "DNSName": { "Fn::GetAtt" : ["InfraElb","CanonicalHostedZoneName"] }
+                "DNSName": { "Fn::GetAtt" : ["InfraElb","DNSName"] }
             }
           },
           {

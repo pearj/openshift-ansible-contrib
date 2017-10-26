@@ -1496,10 +1496,32 @@ class Ec2Inventory(object):
             regex += "\-"
         return re.sub(regex + "]", "_", word)
 
+    def atoi(self, text):
+        return int(text) if text.isdigit() else text
+
+    def natural_keys(self, text):
+        '''
+        alist.sort(key=natural_keys) sorts in human order
+        http://nedbatchelder.com/blog/200712/human_sorting.html
+        (See Toothy's implementation in the comments)
+        '''
+        return [ self.atoi(c) for c in re.split('(\d+)', text) ]
+
+
+    def sortValues(self, od):
+        for k, v in od.items():
+            if isinstance(v, dict):
+                self.sortValues(v)
+            elif isinstance(v, list):
+                # Use natural ordering so that ip address hostnames sort properly
+                v.sort(key=self.natural_keys)
+
     def json_format_dict(self, data, pretty=False):
         ''' Converts a dict to a JSON object and dumps it as a formatted
         string '''
 
+        # Maintain consistent ordering, to prevent ordering of hosts changing where possible
+        self.sortValues(data)
         if pretty:
             return json.dumps(data, sort_keys=True, indent=2)
         else:
