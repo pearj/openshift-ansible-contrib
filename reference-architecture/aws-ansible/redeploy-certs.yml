@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+  become: no
+  vars_files:
+  - /usr/share/ansible/openshift-ansible-contrib/reference-architecture/aws-ansible/playbooks/vars/main.yaml
+  roles:
+  # Group systems
+  - cfn-outputs
+  - instance-groups
+
+- include: /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/redeploy-master-certificates.yml

@@ -1,0 +1,108 @@
+openshift_release: "3.6"
+openshift_image_tag: v3.6.1
+openshift_master_default_subdomain: test-apps.environment.gov.au
+#openshift_exclude_pkg_override: "v3.6.0"
+
+region: "ap-southeast-2"
+stack_name: "openshift-test"
+
+wildcard_apps_certificate_certfile: "/home/centos/dev/test-apps/star.test-apps.environment.gov.au.20171207.cert"
+wildcard_apps_certificate_keyfile: "/home/centos/dev/test-apps/star.test-apps.environment.gov.au.20171207.key"
+wildcard_apps_certificate_cafile: "/home/centos/dev/test-apps/star.test-apps.environment.gov.au.20171207.chain"
+
+# Router certificate (optional)
+openshift_hosted_router_certificate:
+    certfile: "{{ wildcard_apps_certificate_certfile }}"
+    keyfile: "{{ wildcard_apps_certificate_keyfile }}"
+    cafile: "{{ wildcard_apps_certificate_cafile }}"
+
+openshift_master_public_api_url: "https://openshift.{{ openshift_master_default_subdomain }}:443"
+openshift_master_public_console_url: "{{ openshift_master_public_api_url }}/console"
+
+# Add the master console ssl certificate
+openshift_master_named_certificates: [{"certfile": "{{ wildcard_apps_certificate_certfile }}", "keyfile": "{{ wildcard_apps_certificate_keyfile }}", "cafile": "{{ wildcard_apps_certificate_cafile }}", "names": ["*.{{ openshift_master_default_subdomain }}"]}]
+
+openshift_master_overwrite_named_certificates: true
+
+#Centos Atomic
+#ami: "ami-e1332f82"
+
+# Find the latest Centos 7 AMI by running:
+# aws --region ap-southeast-2 ec2 describe-images --owners aws-marketplace --filters Name=product-code,Values=aw0evgkw8e5c1q413zgy5pjce
+# Need to accept terms at https://aws.amazon.com/marketplace/fulfillment?productId=b7ee8a69-ee97-4a49-9e68-afaee216db2e&launch=oneClickLaunch
+# Centos 7 Normal 1708_01
+#ami: "ami-e9c7208b"
+# Centos 7.3 (older)
+ami: "ami-24959b47"
+keypair: "openshift-dev"
+create_key: "no"
+add_node: "no"
+key_path: "/home/centos/.ssh/openshift-dev.pem"
+create_vpc: "no"
+vpc_id: "vpc-f14e1e94"
+private_subnet_id1: "subnet-2837c961"
+private_subnet_id2: "subnet-c6c806a1"
+private_subnet_id3: "subnet-1f9ebc46"
+public_subnet_id1: "subnet-9f34cad6"
+public_subnet_id2: "subnet-39c6085e"
+public_subnet_id3: "subnet-3b9cbe62"
+byo_bastion: "yes"
+bastion_sg: "sg-797df81f"
+master_instance_type: "m4.xlarge"
+node_instance_type: "t2.large"
+app_instance_type: "r4.xlarge"
+app_node_count: "3"
+#public_hosted_zone: "envris-os-test.agiledigital.com.au"
+public_hosted_zone: "test-openshift.environment.gov.au"
+wildcard_zone: "apps.test-openshift.environment.gov.au"
+console_port: "443"
+deployment_type: "origin"
+openshift_sdn: "redhat/openshift-ovs-subnet"
+rhsm_user: None
+rhsm_password: None
+rhsm_pool: None
+
+containerized: True
+
+s3_bucket_name: "openshift-test-ocp-registry-envris-os-test"
+s3_username: "openshift-test-s3-openshift-user"
+github_client_id: "ignoreclient"
+github_client_secret: "ignoresecret"
+github_organization: ["envris"]
+deploy_glusterfs: "false"
+openshift_hosted_metrics_deploy: "true"
+openshift_hosted_metrics_storage_volume_size: "20Gi"
+openshift_hosted_logging_deploy: "true"
+openshift_hosted_logging_storage_volume_size: "100Gi"
+
+openshift_master_identity_providers:
+- name: active_directory
+  challenge: 'true'
+  login: 'true'
+  kind: LDAPPasswordIdentityProvider
+  attributes:
+    email:
+    - mail
+    id:
+    - sAMAccountName
+    name:
+    - displayName
+    preferredUsername:
+    - sAMAccountName
+  insecure: 'true'
+  bindDN: 'CN=svc_OpenShift,OU=SvcAccounts,DC=internal,DC=govt'
+  bindPassword: '1OxgFPcMdiADFGXqyHT4'
+  url: ldap://ad-lb.envris-os-test.agiledigital.com.au:389/ou=deh-staff,dc=internal,dc=govt?samAccountName
+
+
+openshift_http_proxy: "http://proxy.test-openshift.environment.gov.au:3128"
+openshift_https_proxy: "http://proxy.test-openshift.environment.gov.au:3128"
+# Adding the ip of etcd hosts here is needed in version 3.5 
+# https://docs.openshift.com/container-platform/3.5/install_config/upgrading/automated_upgrades.html#verifying-the-upgrade
+# We must also add the ip of the registry which is not know when first installing
+# .ap-southeast-2.amazonaws.com
+openshift_no_proxy: test-openshift.environment.gov.au,.test-openshift.environment.gov.au,.envris-os-dev.agiledigital.com.au,.envris-os-test.agiledigital.com.au,169.254.169.254,.ap-southeast-2.compute.internal,.test-apps.environment.gov.au,172.30.0.1
+openshift_generate_no_proxy_hosts: True
+
+#openshift_disable_check: disk_availability,docker_image_availability
+openshift_disable_check: docker_image_availability

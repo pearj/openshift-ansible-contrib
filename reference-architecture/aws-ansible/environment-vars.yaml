@@ -1,0 +1,97 @@
+openshift_release: "3.6"
+openshift_image_tag: "v3.6.0"
+openshift_master_default_subdomain: "dev-apps.environment.gov.au"
+
+region: "ap-southeast-2"
+stack_name: "openshift-dev"
+
+wildcard_apps_certificate_certfile: "/home/centos/dev/dev-apps/star.dev-apps.environment.gov.au.20171018.cert"
+wildcard_apps_certificate_chainfullfile: "/home/centos/dev/dev-apps/star.dev-apps.environment.gov.au.20171018.chainfull"
+wildcard_apps_certificate_keyfile: "/home/centos/dev/dev-apps/star.dev-apps.environment.gov.au.20171018.key"
+wildcard_apps_certificate_cafile: "/home/centos/dev/dev-apps/star.dev-apps.environment.gov.au.20171018.chain"
+
+# Router certificate (optional)
+openshift_hosted_router_certificate:
+    certfile: "{{ wildcard_apps_certificate_certfile }}"
+    keyfile: "{{ wildcard_apps_certificate_keyfile }}"
+    cafile: "{{ wildcard_apps_certificate_cafile }}"
+
+openshift_master_public_api_url: "https://openshift.{{ openshift_master_default_subdomain }}:443"
+openshift_master_public_console_url: "{{ openshift_master_public_api_url }}/console"
+
+# Add the master console ssl certificate
+openshift_master_named_certificates:
+  - certfile: "{{ wildcard_apps_certificate_chainfullfile }}"
+    keyfile: "{{ wildcard_apps_certificate_keyfile }}"
+    cafile: "{{ wildcard_apps_certificate_cafile }}"
+    names:
+      - "*.{{ openshift_master_default_subdomain }}"
+
+  - certfile: "/home/centos/certbot/conf/live/internal-openshift-master.envris-os-dev.agiledigital.com.au/fullchain.pem"
+    keyfile: "/home/centos/certbot/conf/live/internal-openshift-master.envris-os-dev.agiledigital.com.au/privkey.pem"
+    cafile: "/home/centos/certbot/conf/live/internal-openshift-master.envris-os-dev.agiledigital.com.au/chain.pem"
+    names:
+      - "internal-openshift-master.envris-os-dev.agiledigital.com.au"
+      
+
+openshift_master_overwrite_named_certificates: true
+
+
+ami: "ami-24959b47"
+keypair: "openshift-dev"
+create_key: "no"
+add_node: "no"
+key_path: "/home/centos/.ssh/openshift-dev.pem"
+create_vpc: "no"
+vpc_id: "vpc-f14e1e94"
+private_subnet_id1: "subnet-abe711e2"
+private_subnet_id2: "subnet-ceb771a9"
+private_subnet_id3: "subnet-26b99c7f"
+public_subnet_id1: "subnet-99ec1ad0"
+public_subnet_id2: "subnet-71bd7b16"
+public_subnet_id3: "subnet-5e84a107"
+byo_bastion: "yes"
+bastion_sg: "sg-797df81f"
+master_instance_type: "m4.xlarge"
+node_instance_type: "t2.large"
+app_instance_type: "r4.xlarge"
+app_node_count: "3"
+public_hosted_zone: "envris-os-dev.agiledigital.com.au"
+wildcard_zone: "apps.envris-os-dev.agiledigital.com.au"
+console_port: "443"
+deployment_type: "origin"
+openshift_sdn: "redhat/openshift-ovs-subnet"
+rhsm_user: None
+rhsm_password: None
+rhsm_pool: None
+containerized: False
+
+s3_bucket_name: "openshift-dev-ocp-registry-envris-os-dev"
+s3_username: "openshift-dev-s3-openshift-user"
+github_client_id: "ignoreclient"
+github_client_secret: "ignoresecret"
+github_organization: ["envris"]
+deploy_glusterfs: "false"
+openshift_hosted_metrics_deploy: "true"
+openshift_hosted_metrics_storage_volume_size: "20Gi"
+openshift_hosted_logging_deploy: "true"
+openshift_hosted_logging_storage_volume_size: "100Gi"
+
+openshift_master_identity_providers:
+- name: active_directory
+  challenge: 'true'
+  login: 'true'
+  kind: LDAPPasswordIdentityProvider
+  attributes:
+    email:
+    - mail
+    id:
+    - sAMAccountName
+    name:
+    - displayName
+    preferredUsername:
+    - sAMAccountName
+  insecure: 'true'
+  bindDN: 'CN=svc_OpenShift,OU=SvcAccounts,DC=internal,DC=govt'
+  bindPassword: '1OxgFPcMdiADFGXqyHT4'
+  url: ldap://ad-lb.dev-openshift.environment.gov.au:389/ou=deh-staff,dc=internal,dc=govt?samAccountName
