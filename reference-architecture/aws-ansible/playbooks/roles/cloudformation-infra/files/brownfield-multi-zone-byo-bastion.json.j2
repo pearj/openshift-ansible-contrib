@@ -2636,14 +2636,14 @@
                 },
                 "GroupId": {
                     "Fn::GetAtt": [
-                        "MasterSG",
+                        "MasterIntElbSG",
                         "GroupId"
                     ]
                 },
                 "IpProtocol": "tcp",
                 "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
-                        "MasterIntElbSG",
+                        "MasterSG",
                         "GroupId"
                     ]
                 },
