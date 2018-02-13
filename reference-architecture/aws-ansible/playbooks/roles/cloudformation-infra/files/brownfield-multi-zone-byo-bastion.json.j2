@@ -3114,46 +3114,12 @@
             },
             "Type": "AWS::EC2::SecurityGroupIngress"
         },
-        "NodeIngressSshMgmt": {
+        "NodeIngressSshCommon": {
             "Properties": {
                 "FromPort": "22",
                 "GroupId": {
                     "Fn::GetAtt": [
-                        "NodeSGMgmt",
-                        "GroupId"
-                    ]
-                },
-                "IpProtocol": "tcp",
-                "SourceSecurityGroupId": {
-                    "Ref": "BastionSg"
-                },
-                "ToPort": "22"
-            },
-            "Type": "AWS::EC2::SecurityGroupIngress"
-        },
-        "NodeIngressSshPrivate": {
-            "Properties": {
-                "FromPort": "22",
-                "GroupId": {
-                    "Fn::GetAtt": [
-                        "NodeSGPrivate",
-                        "GroupId"
-                    ]
-                },
-                "IpProtocol": "tcp",
-                "SourceSecurityGroupId": {
-                    "Ref": "BastionSg"
-                },
-                "ToPort": "22"
-            },
-            "Type": "AWS::EC2::SecurityGroupIngress"
-        },
-        "NodeIngressSshPublic": {
-            "Properties": {
-                "FromPort": "22",
-                "GroupId": {
-                    "Fn::GetAtt": [
-                        "NodeSGPublic",
+                        "NodeSGCommon",
                         "GroupId"
                     ]
                 },
