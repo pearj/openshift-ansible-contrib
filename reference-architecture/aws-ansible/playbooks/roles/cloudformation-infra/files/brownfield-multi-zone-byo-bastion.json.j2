@@ -1006,6 +1006,57 @@
             },
             "Type": "AWS::EC2::SecurityGroupEgress"
         },
+        "InfraLoggingEgressMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Ref": "BastionSg"
+                },
+                "FromPort": 24284,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": 24284
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraLoggingEgressPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Ref": "BastionSg"
+                },
+                "FromPort": 24284,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": 24284
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraLoggingEgressPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Ref": "BastionSg"
+                },
+                "FromPort": 24284,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": 24284
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
         "InfraEgressS3GatewayMgmt": {
             "Properties": {
                 "DestinationPrefixListId": {
