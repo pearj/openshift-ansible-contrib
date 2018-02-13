@@ -38,7 +38,7 @@
 
 - name: define nodes
   lineinfile:
-    line: "{{ hostvars[item].ec2_tag_Name }} openshift_node_labels=\"{'role': 'app'}\""
+    line: "{{ hostvars[item].ec2_tag_Name }} openshift_node_labels=\"{'role': 'app', 'security-zone': '{{ hostvars[item].ec2_tag_openshift-security-zone }}'}\""
     insertafter: [nodes]
     state: present
     dest: ../static-inventory
@@ -49,7 +49,7 @@
 
 - name: define nodes
   lineinfile:
-    line: "{{ hostvars[item].ec2_tag_Name }} openshift_node_labels=\"{'role': 'infra'}\""
+    line: "{{ hostvars[item].ec2_tag_Name }} openshift_node_labels=\"{'role': 'infra', 'security-zone': '{{ hostvars[item].ec2_tag_openshift-security-zone }}'}\""
     insertafter: [nodes]
     state: present
     dest: ../static-inventory
