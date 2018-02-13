@@ -123,7 +123,7 @@
             "Type": "String"
         },
         "ADLoadBalancerZoneID": {
-            "Default": "Z2RPCDW04V8134",
+            "Default": "Z1GM3OXH4ZPM65",
             "Type": "String"
         },
         "AmiId": {
@@ -258,7 +258,7 @@
             "Type": "String"
         },
         "ProxyLoadBalancerZoneID": {
-            "Default": "Z2RPCDW04V8134",
+            "Default": "Z1GM3OXH4ZPM65",
             "Type": "String"
         },
         "PublicHostedZone": {
