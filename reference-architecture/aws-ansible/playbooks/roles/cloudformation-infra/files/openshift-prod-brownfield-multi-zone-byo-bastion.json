@@ -1,0 +1,4448 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "BastionSGId": {
+            "Description": "Bastion SG id",
+            "Value": {
+                "Ref": "BastionSg"
+            }
+        },
+        "InfraSGIdMgmt": {
+            "Description": "Infra Node SG id (Mgmt)",
+            "Value": {
+                "Fn::GetAtt": [
+                    "InfraSGMgmt",
+                    "GroupId"
+                ]
+            }
+        },
+        "InfraSGIdPrivate": {
+            "Description": "Infra Node SG id (Private)",
+            "Value": {
+                "Fn::GetAtt": [
+                    "InfraSGPrivate",
+                    "GroupId"
+                ]
+            }
+        },
+        "InfraSGIdPublic": {
+            "Description": "Infra Node SG id (Public)",
+            "Value": {
+                "Fn::GetAtt": [
+                    "InfraSGPublic",
+                    "GroupId"
+                ]
+            }
+        },
+        "NodeARN": {
+            "Description": "ARN for the Node instance profile",
+            "Value": {
+                "Ref": "NodeInstanceProfile"
+            }
+        },
+        "NodeSGIdMgmt": {
+            "Description": "Node SG id (Mgmt)",
+            "Value": {
+                "Fn::GetAtt": [
+                    "NodeSGMgmt",
+                    "GroupId"
+                ]
+            }
+        },
+        "NodeSGIdPrivate": {
+            "Description": "Node SG id (Private)",
+            "Value": {
+                "Fn::GetAtt": [
+                    "NodeSGPrivate",
+                    "GroupId"
+                ]
+            }
+        },
+        "NodeSGIdPublic": {
+            "Description": "Node SG id (Public)",
+            "Value": {
+                "Fn::GetAtt": [
+                    "NodeSGPublic",
+                    "GroupId"
+                ]
+            }
+        },
+        "PrivateSubnet1": {
+            "Description": "Private Subnet 1",
+            "Value": {
+                "Ref": "PrivateSubnet1"
+            }
+        },
+        "PrivateSubnet2": {
+            "Description": "Private Subnet 2",
+            "Value": {
+                "Ref": "PrivateSubnet2"
+            }
+        },
+        "PrivateSubnet3": {
+            "Description": "Private Subnet 3",
+            "Value": {
+                "Ref": "PrivateSubnet3"
+            }
+        },
+        "S3Bucket": {
+            "Description": "Name of S3 bucket",
+            "Value": {
+                "Ref": "RegistryBucket"
+            }
+        },
+        "S3UserAccessId": {
+            "Description": "AWSAccessKeyId of user",
+            "Value": {
+                "Ref": "CFNKeys"
+            }
+        },
+        "S3UserSecretKey": {
+            "Description": "AWSSecretKey of new S3",
+            "Value": {
+                "Fn::GetAtt": [
+                    "CFNKeys",
+                    "SecretAccessKey"
+                ]
+            }
+        },
+        "StackVpc": {
+            "Description": "VPC that was created",
+            "Value": {
+                "Ref": "Vpc"
+            }
+        }
+    },
+    "Parameters": {
+        "ADLoadBalancerDNSName": {
+            "Default": "internal-int-ldap-ad-elb-147353747.ap-southeast-2.elb.amazonaws.com",
+            "Type": "String"
+        },
+        "ADLoadBalancerSGName": {
+            "Default": "sg-7905b01d",
+            "Type": "String"
+        },
+        "ADLoadBalancerZoneID": {
+            "Default": "Z2RPCDW04V8134",
+            "Type": "String"
+        },
+        "AmiId": {
+            "Type": "AWS::EC2::Image::Id"
+        },
+        "AppNodeInstanceType": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "AppWildcardDomain": {
+            "Type": "String"
+        },
+        "BastionSg": {
+            "Type": "String"
+        },
+        "InfraDockerVolSize": {
+            "Default": "25",
+            "Type": "String"
+        },
+        "InfraDockerVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "InfraInstanceType": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "InfraRootVolSize": {
+            "Default": "50",
+            "Type": "String"
+        },
+        "InfraRootVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "KeyName": {
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "MasterApiPort": {
+            "Type": "Number"
+        },
+        "MasterClusterHostname": {
+            "Type": "String"
+        },
+        "MasterClusterPublicHostname": {
+            "Type": "String"
+        },
+        "MasterDockerVolSize": {
+            "Default": "25",
+            "Type": "String"
+        },
+        "MasterDockerVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "MasterEmptyVolSize": {
+            "Default": "5",
+            "Type": "String"
+        },
+        "MasterEmptyVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "MasterEtcdVolSize": {
+            "Default": "25",
+            "Type": "String"
+        },
+        "MasterEtcdVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "MasterHealthTarget": {
+            "Type": "String"
+        },
+        "MasterInstanceType": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "MasterRootVolSize": {
+            "Default": "50",
+            "Type": "String"
+        },
+        "MasterRootVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "MasterUserData": {
+            "Type": "String"
+        },
+        "NodeDockerVolSize": {
+            "Default": "25",
+            "Type": "String"
+        },
+        "NodeDockerVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "NodeEmptyVolSize": {
+            "Default": "25",
+            "Type": "String"
+        },
+        "NodeEmptyVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "NodeRootVolSize": {
+            "Default": "50",
+            "Type": "String"
+        },
+        "NodeRootVolType": {
+            "Default": "gp2",
+            "Type": "String"
+        },
+        "NodeUserData": {
+            "Type": "String"
+        },
+        "PrivateSubnet1": {
+            "Type": "String"
+        },
+        "PrivateSubnet2": {
+            "Type": "String"
+        },
+        "PrivateSubnet3": {
+            "Type": "String"
+        },
+        "ProxyLoadBalancerDNSName": {
+            "Default": "internal-proxies-350025294.ap-southeast-2.elb.amazonaws.com",
+            "Type": "String"
+        },
+        "ProxyLoadBalancerSGName": {
+            "Default": "sg-c131b6a7",
+            "Type": "String"
+        },
+        "ProxyLoadBalancerZoneID": {
+            "Default": "Z2RPCDW04V8134",
+            "Type": "String"
+        },
+        "PublicHostedZone": {
+            "Type": "String"
+        },
+        "PublicSubnet1": {
+            "Type": "String"
+        },
+        "PublicSubnet2": {
+            "Type": "String"
+        },
+        "PublicSubnet3": {
+            "Type": "String"
+        },
+        "Route53HostedZone": {
+            "Type": "String"
+        },
+        "S3BucketName": {
+            "Type": "String"
+        },
+        "S3GatewayVPCPrefixListID": {
+            "Default": "pl-6ca54005",
+            "Type": "String"
+        },
+        "S3User": {
+            "Type": "String"
+        },
+        "Vpc": {
+            "Type": "String"
+        },
+        "VpcName": {
+            "Default": "ose-on-aws",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+                          "AppNodeMgmt01": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGMgmt",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-mgmt01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+                          "AppNodeMgmt02": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGMgmt",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-mgmt02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+            
+                          "AppNodePrivate01": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPrivate",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-private01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+              "AppNodePrivate02": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPrivate",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-private02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+              "AppNodePrivate03": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPrivate",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet3"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-private03",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+
+        "AppNodePublic01": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPublic",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-public01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "AppNodePublic02": {
+            "DependsOn": [
+                "NodeInstanceProfile"
+            ],
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "AppNodeInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPublic",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-app-node-public02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "app"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+
+        "CFNKeys": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "S3UserName"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "ElasticApiMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "9200",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "9200"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "ElasticApiPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "9200",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "9200"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "ElasticApiPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "9200",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "9200"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "ElasticClusterMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "9300",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "9300"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "ElasticClusterPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "9300",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "9300"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "ElasticClusterPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "9300",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "9300"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "EtcdEgress": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "EtcdIngressEtcd": {
+            "Properties": {
+                "FromPort": "2379",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "2379"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "EtcdIngressEtcdPeer": {
+            "Properties": {
+                "FromPort": "2380",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "2380"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "EtcdIngressMasters": {
+            "Properties": {
+                "FromPort": "2379",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "EtcdSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "2379"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "EtcdSG": {
+            "Properties": {
+                "GroupDescription": "etcd",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_etcd_sg"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "GlusterDaemon": {
+            "Properties": {
+                "FromPort": "24007",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24007"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "GlusterManagement": {
+            "Properties": {
+                "FromPort": "24008",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24008"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "GlusterNfs": {
+            "Properties": {
+                "FromPort": "49152",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "49664"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "GlusterSsh": {
+            "Properties": {
+                "FromPort": "2222",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "2222"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "InfraEgressMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraEgressPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraEgressPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraEgressS3GatewayMgmt": {
+            "Properties": {
+                "DestinationPrefixListId": {
+                    "Ref": "S3GatewayVPCPrefixListID"
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraEgressS3GatewayPrivate": {
+            "Properties": {
+                "DestinationPrefixListId": {
+                    "Ref": "S3GatewayVPCPrefixListID"
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraEgressS3GatewayPublic": {
+            "Properties": {
+                "DestinationPrefixListId": {
+                    "Ref": "S3GatewayVPCPrefixListID"
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbEgressHTTPMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "80",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "80"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbEgressHTTPPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "80",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "80"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbEgressHTTPPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "80",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "80"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbEgressHTTPSMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbEgressHTTPSPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbEgressHTTPSPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "InfraElbMgmt": {
+            "Properties": {
+                "CrossZone": "true",
+                "HealthCheck": {
+                    "HealthyThreshold": "2",
+                    "Interval": "5",
+                    "Target": "TCP:443",
+                    "Timeout": "2",
+                    "UnhealthyThreshold": "2"
+                },
+                "Instances": [
+                                        {
+                        "Ref": "InfraNodeMgmt01"
+                    },
+                                        {
+                        "Ref": "InfraNodeMgmt02"
+                    },
+                                    ],
+                "Listeners": [
+                    {
+                        "InstancePort": "443",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "443",
+                        "Protocol": "TCP"
+                    },
+                    {
+                        "InstancePort": "80",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "80",
+                        "Protocol": "TCP"
+                    }
+                ],
+                "Scheme": "internal",
+                "SecurityGroups": [
+                    {
+                        "Ref": "InfraElbSGMgmt"
+                    }
+                ],
+                "Subnets": [
+                                        {
+                        "Ref": "PublicSubnet1"
+                    },
+                                        {
+                        "Ref": "PublicSubnet2"
+                    },
+                                    ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_router_elb_mgmt"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "InfraElbPrivate": {
+            "Properties": {
+                "CrossZone": "true",
+                "HealthCheck": {
+                    "HealthyThreshold": "2",
+                    "Interval": "5",
+                    "Target": "TCP:443",
+                    "Timeout": "2",
+                    "UnhealthyThreshold": "2"
+                },
+                "Instances": [
+                                        {
+                        "Ref": "InfraNodePrivate01"
+                    },
+                                        {
+                        "Ref": "InfraNodePrivate02"
+                    },
+                                        {
+                        "Ref": "InfraNodePrivate03"
+                    },
+                                    ],
+                "Listeners": [
+                    {
+                        "InstancePort": "443",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "443",
+                        "Protocol": "TCP"
+                    },
+                    {
+                        "InstancePort": "80",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "80",
+                        "Protocol": "TCP"
+                    }
+                ],
+                "Scheme": "internal",
+                "SecurityGroups": [
+                    {
+                        "Ref": "InfraElbSGPrivate"
+                    }
+                ],
+                "Subnets": [
+                                        {
+                        "Ref": "PublicSubnet1"
+                    },
+                                        {
+                        "Ref": "PublicSubnet2"
+                    },
+                                        {
+                        "Ref": "PublicSubnet3"
+                    },
+                                    ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_router_elb_private"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "InfraElbPublic": {
+            "Properties": {
+                "CrossZone": "true",
+                "HealthCheck": {
+                    "HealthyThreshold": "2",
+                    "Interval": "5",
+                    "Target": "TCP:443",
+                    "Timeout": "2",
+                    "UnhealthyThreshold": "2"
+                },
+                "Instances": [
+                                        {
+                        "Ref": "InfraNodePublic01"
+                    },
+                                        {
+                        "Ref": "InfraNodePublic02"
+                    },
+                                    ],
+                "Listeners": [
+                    {
+                        "InstancePort": "443",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "443",
+                        "Protocol": "TCP"
+                    },
+                    {
+                        "InstancePort": "80",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "80",
+                        "Protocol": "TCP"
+                    }
+                ],
+                "Scheme": "internal",
+                "SecurityGroups": [
+                    {
+                        "Ref": "InfraElbSGPublic"
+                    }
+                ],
+                "Subnets": [
+                                        {
+                        "Ref": "PublicSubnet1"
+                    },
+                                        {
+                        "Ref": "PublicSubnet2"
+                    },
+                                    ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_router_elb_public"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "InfraElbSGMgmt": {
+            "Properties": {
+                "GroupDescription": "Management Infra Load Balancer",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "80",
+                        "IpProtocol": "tcp",
+                        "ToPort": "80"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "443",
+                        "IpProtocol": "tcp",
+                        "ToPort": "443"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_router_sg_mgmt"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "InfraElbSGPrivate": {
+            "Properties": {
+                "GroupDescription": "Private Infra Load Balancer",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "80",
+                        "IpProtocol": "tcp",
+                        "ToPort": "80"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "443",
+                        "IpProtocol": "tcp",
+                        "ToPort": "443"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_router_sg_private"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "InfraElbSGPublic": {
+            "Properties": {
+                "GroupDescription": "Infra Load Balancer",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "80",
+                        "IpProtocol": "tcp",
+                        "ToPort": "80"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "443",
+                        "IpProtocol": "tcp",
+                        "ToPort": "443"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_router_sg_public"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "InfraIngressHTTPMgmt": {
+            "Properties": {
+                "FromPort": "80",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "80"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "InfraIngressHTTPPrivate": {
+            "Properties": {
+                "FromPort": "80",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "80"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "InfraIngressHTTPPublic": {
+            "Properties": {
+                "FromPort": "80",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "80"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "InfraIngressHTTPSMgmt": {
+            "Properties": {
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "InfraIngressHTTPSPrivate": {
+            "Properties": {
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "InfraIngressHTTPSPublic": {
+            "Properties": {
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "InfraSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "InfraElbSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+
+        "InfraNodeMgmt01": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGMgmt",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGMgmt",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-mgmt01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "InfraNodeMgmt02": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGMgmt",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGMgmt",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-mgmt02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+
+        "InfraNodePrivate01": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPrivate",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGPrivate",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-private01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "InfraNodePrivate02": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPrivate",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGPrivate",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-private02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "InfraNodePrivate03": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPrivate",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGPrivate",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet3"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-private03",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+
+        "InfraNodePublic01": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPublic",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGPublic",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-public01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "InfraNodePublic02": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "NodeEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "NodeEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "NodeInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InfraInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGPublic",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "InfraSGPublic",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-infra-node-public02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "infra"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "NodeUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "InfraSGMgmt": {
+            "Properties": {
+                "GroupDescription": "Infra (Management)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_infra_node_sg_mgmt"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "InfraSGPrivate": {
+            "Properties": {
+                "GroupDescription": "Infra (Private)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_infra_node_sg_private"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "InfraSGPublic": {
+            "Properties": {
+                "GroupDescription": "Infra (Public)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_infra_node_sg_public"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "LoggingTCPMgmt": {
+            "Properties": {
+                "FromPort": "24224",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24224"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "LoggingTCPPrivate": {
+            "Properties": {
+                "FromPort": "24224",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24224"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "LoggingTCPPublic": {
+            "Properties": {
+                "FromPort": "24224",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24224"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "LoggingUDPMgmt": {
+            "Properties": {
+                "FromPort": "24224",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "udp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24224"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "LoggingUDPPrivate": {
+            "Properties": {
+                "FromPort": "24224",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "udp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24224"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "LoggingUDPPublic": {
+            "Properties": {
+                "FromPort": "24224",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "udp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "24224"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "Master01": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "false",
+                            "VolumeSize": {
+                                "Ref": "MasterEtcdVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterEtcdVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdd",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "MasterInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "MasterInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "MasterSG",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "EtcdSG",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-master01",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "master"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "MasterUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "Master02": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "false",
+                            "VolumeSize": {
+                                "Ref": "MasterEtcdVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterEtcdVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdd",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "MasterInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "MasterInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "MasterSG",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "EtcdSG",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-master02",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "master"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "MasterUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "Master03": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterRootVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterRootVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdb",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterDockerVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterDockerVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdc",
+                        "Ebs": {
+                            "DeleteOnTermination": "false",
+                            "VolumeSize": {
+                                "Ref": "MasterEtcdVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterEtcdVolType"
+                            }
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/xvdd",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeSize": {
+                                "Ref": "MasterEmptyVolSize"
+                            },
+                            "VolumeType": {
+                                "Ref": "MasterEmptyVolType"
+                            }
+                        }
+                    }
+                ],
+                "IamInstanceProfile": {
+                    "Ref": "MasterInstanceProfile"
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "MasterInstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Fn::GetAtt": [
+                            "NodeSGCommon",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "MasterSG",
+                            "GroupId"
+                        ]
+                    },
+                    {
+                        "Fn::GetAtt": [
+                            "EtcdSG",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet3"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-master03",
+                                    {
+                                        "Ref": "PublicHostedZone"
+                                    }
+                                ]
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    },
+                    {
+                        "Key": "openshift-role",
+                        "Value": "master"
+                    }
+                ],
+                "UserData": {
+                    "Ref": "MasterUserData"
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "MasterEgressADCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Ref": "ADLoadBalancerSGName"
+                },
+                "FromPort": "389",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": "389"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "MasterExtElb": {
+            "Properties": {
+                "ConnectionSettings": {
+                    "IdleTimeout": 300
+                },
+                "CrossZone": "true",
+                "HealthCheck": {
+                    "HealthyThreshold": "2",
+                    "Interval": "5",
+                    "Target": {
+                        "Ref": "MasterHealthTarget"
+                    },
+                    "Timeout": "2",
+                    "UnhealthyThreshold": "2"
+                },
+                "Instances": [
+                    {
+                        "Ref": "Master01"
+                    },
+                    {
+                        "Ref": "Master02"
+                    },
+                    {
+                        "Ref": "Master03"
+                    }
+                ],
+                "Listeners": [
+                    {
+                        "InstancePort": {
+                            "Ref": "MasterApiPort"
+                        },
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": {
+                            "Ref": "MasterApiPort"
+                        },
+                        "Protocol": "TCP"
+                    }
+                ],
+                "Scheme": "internal",
+                "SecurityGroups": [
+                    {
+                        "Ref": "MasterExtElbSG"
+                    }
+                ],
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet1"
+                    },
+                    {
+                        "Ref": "PublicSubnet2"
+                    },
+                    {
+                        "Ref": "PublicSubnet3"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_master_elb"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "MasterExtElbEgressAPI": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterExtElbSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "MasterExtElbSG": {
+            "Properties": {
+                "GroupDescription": "Master External Load Balancer",
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": {
+                            "Ref": "MasterApiPort"
+                        },
+                        "IpProtocol": "tcp",
+                        "ToPort": {
+                            "Ref": "MasterApiPort"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_elb_master_sg"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "MasterIngressExtLB": {
+            "Properties": {
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterExtElbSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIngressIntLB": {
+            "Properties": {
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterIntElbSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIngressMastersAPITCP": {
+            "Properties": {
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIngressNodesAPITCP": {
+            "Properties": {
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIngressNodesDNSTCP": {
+            "Properties": {
+                "FromPort": "8053",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "8053"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIngressNodesDNSUDP": {
+            "Properties": {
+                "FromPort": "8053",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "udp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "8053"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterInstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "MasterPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "MasterIntElb": {
+            "Properties": {
+                "ConnectionSettings": {
+                    "IdleTimeout": 300
+                },
+                "CrossZone": "true",
+                "HealthCheck": {
+                    "HealthyThreshold": "2",
+                    "Interval": "5",
+                    "Target": {
+                        "Ref": "MasterHealthTarget"
+                    },
+                    "Timeout": "2",
+                    "UnhealthyThreshold": "2"
+                },
+                "Instances": [
+                    {
+                        "Ref": "Master01"
+                    },
+                    {
+                        "Ref": "Master02"
+                    },
+                    {
+                        "Ref": "Master03"
+                    }
+                ],
+                "Listeners": [
+                    {
+                        "InstancePort": {
+                            "Ref": "MasterApiPort"
+                        },
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": {
+                            "Ref": "MasterApiPort"
+                        },
+                        "Protocol": "TCP"
+                    }
+                ],
+                "Scheme": "internal",
+                "SecurityGroups": [
+                    {
+                        "Ref": "MasterIntElbSG"
+                    }
+                ],
+                "Subnets": [
+                    {
+                        "Ref": "PrivateSubnet1"
+                    },
+                    {
+                        "Ref": "PrivateSubnet2"
+                    },
+                    {
+                        "Ref": "PrivateSubnet3"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_internal_master_elb"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "MasterIntElbEgressAPI": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterIntElbSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "MasterIntElbIngressMasters": {
+            "Properties": {
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterIntElbSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIntElbIngressNodes": {
+            "Properties": {
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "MasterIntElbSG",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "MasterIntElbSG": {
+            "Properties": {
+                "GroupDescription": "Master Internal Load Balancer",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_internal_elb_master_sg"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "MasterPolicy": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ec2:DescribeVolume*",
+                                        "ec2:CreateVolume",
+                                        "ec2:CreateTags",
+                                        "ec2:DescribeInstance*",
+                                        "ec2:AttachVolume",
+                                        "ec2:DetachVolume",
+                                        "ec2:DeleteVolume",
+                                        "ec2:DescribeSubnets",
+                                        "ec2:CreateSecurityGroup",
+                                        "ec2:DescribeSecurityGroups",
+                                        "elasticloadbalancing:DescribeTags",
+                                        "elasticloadbalancing:CreateLoadBalancerListeners",
+                                        "ec2:DescribeRouteTables",
+                                        "elasticloadbalancing:ConfigureHealthCheck",
+                                        "ec2:AuthorizeSecurityGroupIngress",
+                                        "elasticloadbalancing:DeleteLoadBalancerListeners",
+                                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                                        "elasticloadbalancing:DescribeLoadBalancers",
+                                        "elasticloadbalancing:CreateLoadBalancer",
+                                        "elasticloadbalancing:DeleteLoadBalancer",
+                                        "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                                        "elasticloadbalancing:DescribeLoadBalancerAttributes"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "master-ec2-all"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "MasterSG": {
+            "Properties": {
+                "GroupDescription": "Master",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_master_sg"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "NodeEgressCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressDNSCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Ref": "ProxyLoadBalancerSGName"
+                },
+                "FromPort": "53",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": "53"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressMgmt": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressPrivate": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressProxyCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Ref": "ProxyLoadBalancerSGName"
+                },
+                "FromPort": "3128",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "3128"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressPublic": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressServicesMgmt": {
+            "Properties": {
+                "CidrIp": "155.187.51.0/24",
+                "FromPort": -1,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "-1",
+                "ToPort": -1
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeIngressMasterKubelet": {
+            "Properties": {
+                "FromPort": "10250",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterSG",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "10250"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "NodeIngressNodeKubelet": {
+            "Properties": {
+                "FromPort": "10250",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "10250"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "NodeIngressNodeVXLAN": {
+            "Properties": {
+                "FromPort": "4789",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "udp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "4789"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "NodeIngressSshMgmt": {
+            "Properties": {
+                "FromPort": "22",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGMgmt",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Ref": "BastionSg"
+                },
+                "ToPort": "22"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "NodeIngressSshPrivate": {
+            "Properties": {
+                "FromPort": "22",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPrivate",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Ref": "BastionSg"
+                },
+                "ToPort": "22"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "NodeIngressSshPublic": {
+            "Properties": {
+                "FromPort": "22",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGPublic",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Ref": "BastionSg"
+                },
+                "ToPort": "22"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "NodeInstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "NodePolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "NodePolicy": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "ec2:DescribeInstance*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "node-describe"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "NodeSGCommon": {
+            "Properties": {
+                "GroupDescription": "Node (All Nodes)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_node_sg_common"
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "NodeSGMgmt": {
+            "Properties": {
+                "GroupDescription": "Node (Management)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_node_sg_mgmt"
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "NodeSGPrivate": {
+            "Properties": {
+                "GroupDescription": "Node (Private)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_node_sg_private"
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "NodeSGPublic": {
+            "Properties": {
+                "GroupDescription": "Node (Public)",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_node_sg_public"
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "RegistryBucket": {
+            "Properties": {
+                "BucketName": {
+                    "Ref": "S3BucketName"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "Route53Records": {
+            "DependsOn": [
+                "InfraElbPublic",
+                "InfraElbMgmt",
+                "InfraElbPrivate",
+                "MasterIntElb",
+                "Master01",
+                "Master02",
+                "Master03",
+                "MasterExtElb"
+            ],
+            "Properties": {
+                "HostedZoneName": {
+                    "Ref": "Route53HostedZone"
+                },
+                "RecordSets": [
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Ref": "ProxyLoadBalancerDNSName"
+                            },
+                            "HostedZoneId": {
+                                "Ref": "ProxyLoadBalancerZoneID"
+                            }
+                        },
+                        "Name": "proxy.envris-os-proxydev.agiledigital.com.au",
+                        "Type": "A"
+                    },
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Ref": "ADLoadBalancerDNSName"
+                            },
+                            "HostedZoneId": {
+                                "Ref": "ADLoadBalancerZoneID"
+                            }
+                        },
+                        "Name": "ad-lb.envris-os-proxydev.agiledigital.com.au",
+                        "Type": "A"
+                    },
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Fn::GetAtt": [
+                                    "MasterExtElb",
+                                    "DNSName"
+                                ]
+                            },
+                            "HostedZoneId": {
+                                "Fn::GetAtt": [
+                                    "MasterExtElb",
+                                    "CanonicalHostedZoneNameID"
+                                ]
+                            }
+                        },
+                        "Name": {
+                            "Ref": "MasterClusterPublicHostname"
+                        },
+                        "Type": "A"
+                    },
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Fn::GetAtt": [
+                                    "MasterIntElb",
+                                    "DNSName"
+                                ]
+                            },
+                            "HostedZoneId": {
+                                "Fn::GetAtt": [
+                                    "MasterIntElb",
+                                    "CanonicalHostedZoneNameID"
+                                ]
+                            }
+                        },
+                        "Name": {
+                            "Ref": "MasterClusterHostname"
+                        },
+                        "Type": "A"
+                    },
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Fn::GetAtt": [
+                                    "InfraElbPublic",
+                                    "DNSName"
+                                ]
+                            },
+                            "HostedZoneId": {
+                                "Fn::GetAtt": [
+                                    "InfraElbPublic",
+                                    "CanonicalHostedZoneNameID"
+                                ]
+                            }
+                        },
+                        "Name": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "public",
+                                    {
+                                        "Ref": "AppWildcardDomain"
+                                    }
+                                ]
+                            ]
+                        },
+                        "Type": "A"
+                    },
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Fn::GetAtt": [
+                                    "InfraElbMgmt",
+                                    "DNSName"
+                                ]
+                            },
+                            "HostedZoneId": {
+                                "Fn::GetAtt": [
+                                    "InfraElbMgmt",
+                                    "CanonicalHostedZoneNameID"
+                                ]
+                            }
+                        },
+                        "Name": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "mgmt",
+                                    {
+                                        "Ref": "AppWildcardDomain"
+                                    }
+                                ]
+                            ]
+                        },
+                        "Type": "A"
+                    },
+                    {
+                        "AliasTarget": {
+                            "DNSName": {
+                                "Fn::GetAtt": [
+                                    "InfraElbPrivate",
+                                    "DNSName"
+                                ]
+                            },
+                            "HostedZoneId": {
+                                "Fn::GetAtt": [
+                                    "InfraElbPrivate",
+                                    "CanonicalHostedZoneNameID"
+                                ]
+                            }
+                        },
+                        "Name": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "private",
+                                    {
+                                        "Ref": "AppWildcardDomain"
+                                    }
+                                ]
+                            ]
+                        },
+                        "Type": "A"
+                    },
+                    {
+                        "Name": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-master01",
+                                    {
+                                        "Ref": "Route53HostedZone"
+                                    }
+                                ]
+                            ]
+                        },
+                        "ResourceRecords": [
+                            {
+                                "Fn::GetAtt": [
+                                    "Master01",
+                                    "PrivateIp"
+                                ]
+                            }
+                        ],
+                        "TTL": "300",
+                        "Type": "A"
+                    },
+                    {
+                        "Name": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-master02",
+                                    {
+                                        "Ref": "Route53HostedZone"
+                                    }
+                                ]
+                            ]
+                        },
+                        "ResourceRecords": [
+                            {
+                                "Fn::GetAtt": [
+                                    "Master02",
+                                    "PrivateIp"
+                                ]
+                            }
+                        ],
+                        "TTL": "300",
+                        "Type": "A"
+                    },
+                    {
+                        "Name": {
+                            "Fn::Join": [
+                                ".",
+                                [
+                                    "ose-master03",
+                                    {
+                                        "Ref": "Route53HostedZone"
+                                    }
+                                ]
+                            ]
+                        },
+                        "ResourceRecords": [
+                            {
+                                "Fn::GetAtt": [
+                                    "Master03",
+                                    "PrivateIp"
+                                ]
+                            }
+                        ],
+                        "TTL": "300",
+                        "Type": "A"
+                    },
+
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-private01",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodePrivate01", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-private02",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodePrivate02", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-private03",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodePrivate03", "PrivateIp"] }]
+                    },
+                                                            {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-mgmt01",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodeMgmt01", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-mgmt02",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodeMgmt02", "PrivateIp"] }]
+                    },
+                                                            {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-public01",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodePublic01", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-infra-node-public02",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["InfraNodePublic02", "PrivateIp"] }]
+                    },
+                    
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-private01",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodePrivate01", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-private02",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodePrivate02", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-private03",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodePrivate03", "PrivateIp"] }]
+                    },
+                                                            {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-mgmt01",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodeMgmt01", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-mgmt02",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodeMgmt02", "PrivateIp"] }]
+                    },
+                                                            {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-public01",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodePublic01", "PrivateIp"] }]
+                    },
+                                        {
+                      "Name": {"Fn::Join": [".", ["ose-app-node-public02",{"Ref": "Route53HostedZone"}]]},
+                      "Type": "A",
+                       "TTL": "300",
+                      "ResourceRecords": [{ "Fn::GetAtt" : ["AppNodePublic02", "PrivateIp"] }]
+                    },
+                                    ]
+            },
+            "Type": "AWS::Route53::RecordSetGroup"
+        },
+        "S3UserName": {
+            "Properties": {
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:*"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "accessalls3"
+                    }
+                ],
+                "UserName": {
+                    "Ref": "S3User"
+                }
+            },
+            "Type": "AWS::IAM::User"
+        }
+    }
+}

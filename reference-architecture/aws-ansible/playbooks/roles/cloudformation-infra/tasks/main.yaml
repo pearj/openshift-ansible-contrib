@@ -1,15 +1,19 @@
 ---
 - name: Render Greenfield Template
   template: src=roles/cloudformation-infra/files/greenfield.json.j2 dest=roles/cloudformation-infra/files/{{ stack_name }}-greenfield.json
-  when: create_vpc == "yes"
+  when: create_vpc == "yes" and multi_zone == "no"
 
 - name: Render Brownfield Template
   template: src=roles/cloudformation-infra/files/brownfield.json.j2 dest=roles/cloudformation-infra/files/{{ stack_name }}-brownfield.json
-  when: create_vpc == "no" and byo_bastion == "no"
+  when: create_vpc == "no" and byo_bastion == "no" and multi_zone == "no"
 
 - name: Render Brownfield BYO Bastion Template
   template: src=roles/cloudformation-infra/files/brownfield-byo-bastion.json.j2 dest=roles/cloudformation-infra/files/{{ stack_name }}-brownfield-byo-bastion.json
-  when: create_vpc == "no" and byo_bastion == "yes"
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "no"
+
+- name: Render Brownfield Multi Zone BYO Bastion Template
+  template: src=roles/cloudformation-infra/files/brownfield-multi-zone-byo-bastion.json.j2 dest=roles/cloudformation-infra/files/{{ stack_name }}-brownfield-multi-zone-byo-bastion.json
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
 
 - name: Create Greenfield Infrastructure
   cloudformation:
@@ -49,7 +53,7 @@
       S3User: "{{ s3_username }}"
     tags:
       clusterid: "{{ stack_name }}"
-  when: create_vpc == "yes"
+  when: create_vpc == "yes" and multi_zone == "no"
 
 - name: Create Brownfield Infrastructure
   cloudformation:
@@ -105,7 +109,7 @@
       S3User: "{{ s3_username }}"
     tags:
       clusterid: "{{ stack_name }}"
-  when: create_vpc == "no" and byo_bastion == "no"
+  when: create_vpc == "no" and byo_bastion == "no" and multi_zone == "no"
 
 - name: Create Brownfield Infrastructure with existing bastion
   cloudformation:
@@ -158,7 +162,73 @@
       S3User: "{{ s3_username }}"
     tags:
       clusterid: "{{ stack_name }}"
-  when: create_vpc == "no" and byo_bastion == "yes"
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "no"
+
+# Start Multi-zone
+- name: Setup variables for Brownfield Multi Zone Infrastructure with existing bastion
+  set_fact: remote_template_filename="{{ stack_name }}-brownfield-multi-zone-byo-bastion-{{lookup('pipe','date +%Y%m%d%H%M%S')}}.json"
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+- name: Upload template for Brownfield Multi Zone Infrastructure with existing bastion to s3
+  aws_s3: # Multi-zone template is too big to upload directly
+    bucket: cf-templates-1gw9kbnafe5zv-ap-southeast-2
+    object: "/{{ remote_template_filename }}"
+    src: "roles/cloudformation-infra/files/{{ stack_name }}-brownfield-multi-zone-byo-bastion.json"
+    mode: put
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+- name: Create Brownfield Multi Zone Infrastructure with existing bastion from uploaded s3 template
+  cloudformation:
+    stack_name: "{{ stack_name }}"
+    state: "present"
+    region: "{{ region }}"
+    template_url: "https://s3.amazonaws.com/cf-templates-1gw9kbnafe5zv-ap-southeast-2/{{ remote_template_filename }}"
+    template_parameters:
+      Vpc: "{{ vpc_id }}"
+      BastionSg: "{{ bastion_sg }}"
+      PrivateSubnet1: "{{ private_subnet_id1 }}"
+      PrivateSubnet2: "{{ private_subnet_id2 }}"
+      PrivateSubnet3: "{{ private_subnet_id3 }}"
+      PublicSubnet1: "{{ public_subnet_id1 }}"
+      PublicSubnet2: "{{ public_subnet_id2 }}"
+      PublicSubnet3: "{{ public_subnet_id3 }}"
+      Route53HostedZone: "{{ public_hosted_zone }}."
+      PublicHostedZone: "{{ public_hosted_zone }}"
+      MasterApiPort: "{{ console_port }}"
+      MasterHealthTarget: "SSL:{{ console_port }}"
+      MasterClusterHostname: "{{ openshift_master_cluster_hostname }}"
+      MasterClusterPublicHostname: "{{ openshift_master_cluster_public_hostname }}"
+      AppWildcardDomain: "*.{{ wildcard_zone }}"
+      KeyName: "{{ keypair }}"
+      MasterInstanceType: "{{ master_instance_type }}"
+      AmiId: "{{ ami }}"
+      MasterRootVolSize: "50"
+      MasterRootVolType: gp2
+      MasterDockerVolSize: "{{ docker_storage }}"
+      MasterDockerVolType: gp2
+      MasterEtcdVolSize: "{{ etcd_storage }}"
+      MasterEtcdVolType: gp2
+      MasterEmptyVolSize: "5"
+      MasterEmptyVolType: gp2
+      MasterUserData: "{{ lookup('file', 'user_data_master.yml') | b64encode }}"
+      InfraInstanceType: "{{ node_instance_type }}"
+      InfraRootVolSize: "50"
+      InfraRootVolType: gp2
+      InfraDockerVolSize: "{{ docker_storage }}"
+      InfraDockerVolType: gp2
+      NodeEmptyVolSize: "{{ emptydir_storage }}"
+      NodeEmptyVolType: gp2
+      NodeUserData: "{{ lookup('file', 'user_data_node.yml') | b64encode }}"
+      AppNodeInstanceType: "{{ app_instance_type }}"
+      NodeRootVolSize: "50"
+      NodeRootVolType: gp2
+      NodeDockerVolSize: "{{ docker_storage }}"
+      NodeDockerVolType: gp2
+      S3BucketName: "{{ s3_bucket_name }}"
+      S3User: "{{ s3_username }}"
+    tags:
+      clusterid: "{{ stack_name }}"
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+
+# End Multi-zone
 
 - name: Add App Node
   cloudformation:
