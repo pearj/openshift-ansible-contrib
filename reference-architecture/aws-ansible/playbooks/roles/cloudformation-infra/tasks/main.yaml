@@ -107,6 +107,7 @@
       NodeDockerVolType: gp2
       S3BucketName: "{{ s3_bucket_name }}"
       S3User: "{{ s3_username }}"
+      EFSUser: "{{ efs_username }}"
     tags:
       clusterid: "{{ stack_name }}"
   when: create_vpc == "no" and byo_bastion == "no" and multi_zone == "no"
@@ -184,12 +185,6 @@
     template_parameters:
       Vpc: "{{ vpc_id }}"
       BastionSg: "{{ bastion_sg }}"
-      PrivateSubnet1: "{{ private_subnet_id1 }}"
-      PrivateSubnet2: "{{ private_subnet_id2 }}"
-      PrivateSubnet3: "{{ private_subnet_id3 }}"
-      PublicSubnet1: "{{ public_subnet_id1 }}"
-      PublicSubnet2: "{{ public_subnet_id2 }}"
-      PublicSubnet3: "{{ public_subnet_id3 }}"
       Route53HostedZone: "{{ public_hosted_zone }}."
       PublicHostedZone: "{{ public_hosted_zone }}"
       MasterApiPort: "{{ console_port }}"
@@ -224,6 +219,21 @@
       NodeDockerVolType: gp2
       S3BucketName: "{{ s3_bucket_name }}"
       S3User: "{{ s3_username }}"
+      ServicesCommonSubnet1: "{{ services_common_subnet1 }}"
+      ServicesCommonSubnet2: "{{ services_common_subnet2 }}"
+      ServicesCommonSubnet3: "{{ services_common_subnet3 }}"
+      MasterSubnet1: "{{ master_subnet1 }}"
+      MasterSubnet2: "{{ master_subnet2 }}"
+      MasterSubnet3: "{{ master_subnet3 }}"
+      NodePublicSubnet1: "{{ node_public_subnet1 }}"
+      NodePublicSubnet2: "{{ node_public_subnet2 }}"
+      NodePublicSubnet3: "{{ node_public_subnet3 }}"
+      NodePrivateSubnet1: "{{ node_private_subnet1 }}"
+      NodePrivateSubnet2: "{{ node_private_subnet2 }}"
+      NodePrivateSubnet3: "{{ node_private_subnet3 }}"
+      NodeMgmtSubnet1: "{{ node_mgmt_subnet1 }}"
+      NodeMgmtSubnet2: "{{ node_mgmt_subnet2 }}"
+      NodeMgmtSubnet3: "{{ node_mgmt_subnet3 }}"
     tags:
       clusterid: "{{ stack_name }}"
   when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
