@@ -67,24 +67,6 @@
                 ]
             }
         },
-        "PrivateSubnet1": {
-            "Description": "Private Subnet 1",
-            "Value": {
-                "Ref": "PrivateSubnet1"
-            }
-        },
-        "PrivateSubnet2": {
-            "Description": "Private Subnet 2",
-            "Value": {
-                "Ref": "PrivateSubnet2"
-            }
-        },
-        "PrivateSubnet3": {
-            "Description": "Private Subnet 3",
-            "Value": {
-                "Ref": "PrivateSubnet3"
-            }
-        },
         "S3Bucket": {
             "Description": "Name of S3 bucket",
             "Value": {
@@ -120,11 +102,11 @@
         },
         "ADLoadBalancerSGName": {
             "Default": "sg-7905b01d",
-            "Type": "String"
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "ADLoadBalancerZoneID": {
             "Default": "Z1GM3OXH4ZPM65",
-            "Type": "String"
+            "Type": "AWS::Route53::HostedZone::Id"
         },
         "AmiId": {
             "Type": "AWS::EC2::Image::Id"
@@ -137,7 +119,7 @@
             "Type": "String"
         },
         "BastionSg": {
-            "Type": "String"
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "InfraDockerVolSize": {
             "Default": "25",
@@ -240,41 +222,23 @@
         "NodeUserData": {
             "Type": "String"
         },
-        "PrivateSubnet1": {
-            "Type": "String"
-        },
-        "PrivateSubnet2": {
-            "Type": "String"
-        },
-        "PrivateSubnet3": {
-            "Type": "String"
-        },
         "ProxyLoadBalancerDNSName": {
             "Default": "internal-proxies-350025294.ap-southeast-2.elb.amazonaws.com",
             "Type": "String"
         },
         "ProxyLoadBalancerSGName": {
             "Default": "sg-c131b6a7",
-            "Type": "String"
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "ProxyLoadBalancerZoneID": {
             "Default": "Z1GM3OXH4ZPM65",
-            "Type": "String"
+            "Type": "AWS::Route53::HostedZone::Id"
         },
         "PublicHostedZone": {
-            "Type": "String"
-        },
-        "PublicSubnet1": {
-            "Type": "String"
-        },
-        "PublicSubnet2": {
-            "Type": "String"
-        },
-        "PublicSubnet3": {
-            "Type": "String"
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "Route53HostedZone": {
-            "Type": "String"
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "S3BucketName": {
             "Type": "String"
@@ -287,11 +251,52 @@
             "Type": "String"
         },
         "Vpc": {
-            "Type": "String"
+            "Type": "AWS::EC2::VPC::Id"
         },
-        "VpcName": {
-            "Default": "ose-on-aws",
-            "Type": "String"
+        "ServicesCommonSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "ServicesCommonSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "ServicesCommonSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "MasterSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "MasterSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "MasterSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePublicSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePublicSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePublicSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePrivateSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePrivateSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePrivateSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodeMgmtSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodeMgmtSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodeMgmtSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
         }
     },
     "Resources": {
@@ -370,7 +375,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet{{ rotator }}"
+                    "Ref": "NodeMgmtSubnet{{ rotator }}"
                 },
                 "Tags": [
                     {
@@ -486,7 +491,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet{{ rotator }}"
+                    "Ref": "NodePrivateSubnet{{ rotator }}"
                 },
                 "Tags": [
                     {
@@ -602,7 +607,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet{{ rotator }}"
+                    "Ref": "NodePublicSubnet{{ rotator }}"
                 },
                 "Tags": [
                     {
@@ -1268,7 +1273,7 @@
                 "Subnets": [
                     {% for idx in range(1, infra_node_mgmt_count|int + 1) if not idx > 3 %}
                     {
-                        "Ref": "PublicSubnet{{ idx }}"
+                        "Ref": "ServicesCommonSubnet{{ idx }}"
                     },
                     {% endfor %}
                 ],
@@ -1321,7 +1326,7 @@
                 "Subnets": [
                     {% for idx in range(1, infra_node_private_count|int + 1) if not idx > 3 %}
                     {
-                        "Ref": "PublicSubnet{{ idx }}"
+                        "Ref": "ServicesCommonSubnet{{ idx }}"
                     },
                     {% endfor %}
                 ],
@@ -1374,7 +1379,7 @@
                 "Subnets": [
                     {% for idx in range(1, infra_node_public_count|int + 1) if not idx > 3 %}
                     {
-                        "Ref": "PublicSubnet{{ idx }}"
+                        "Ref": "ServicesCommonSubnet{{ idx }}"
                     },
                     {% endfor %}
                 ],
@@ -1673,7 +1678,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet{{ rotator }}"
+                    "Ref": "NodeMgmtSubnet{{ rotator }}"
                 },
                 "Tags": [
                     {
@@ -1792,7 +1797,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet{{ rotator }}"
+                    "Ref": "NodePrivateSubnet{{ rotator }}"
                 },
                 "Tags": [
                     {
@@ -1911,7 +1916,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet{{ rotator }}"
+                    "Ref": "NodePublicSubnet{{ rotator }}"
                 },
                 "Tags": [
                     {
@@ -2201,7 +2206,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "MasterSubnet1"
                 },
                 "Tags": [
                     {
@@ -2320,7 +2325,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "MasterSubnet2"
                 },
                 "Tags": [
                     {
@@ -2439,7 +2444,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet3"
+                    "Ref": "MasterSubnet3"
                 },
                 "Tags": [
                     {
@@ -2536,13 +2541,13 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "PublicSubnet1"
+                        "Ref": "ServicesCommonSubnet1"
                     },
                     {
-                        "Ref": "PublicSubnet2"
+                        "Ref": "ServicesCommonSubnet2"
                     },
                     {
-                        "Ref": "PublicSubnet3"
+                        "Ref": "ServicesCommonSubnet3"
                     }
                 ],
                 "Tags": [
@@ -2797,13 +2802,13 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "PrivateSubnet1"
+                        "Ref": "MasterSubnet1"
                     },
                     {
-                        "Ref": "PrivateSubnet2"
+                        "Ref": "MasterSubnet2"
                     },
                     {
-                        "Ref": "PrivateSubnet3"
+                        "Ref": "MasterSubnet3"
                     }
                 ],
                 "Tags": [
