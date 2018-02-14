@@ -7,6 +7,21 @@
                 "Ref": "BastionSg"
             }
         },
+        "EFSUserAccessId": {
+            "Description": "AWSAccessKeyId of EFS user",
+            "Value": {
+                "Ref": "EFSKeys"
+            }
+        },
+        "EFSUserSecretKey": {
+            "Description": "AWSSecretKey of EFS user",
+            "Value": {
+                "Fn::GetAtt": [
+                    "EFSKeys",
+                    "SecretAccessKey"
+                ]
+            }
+        },
         "InfraSGIdMgmt": {
             "Description": "Infra Node SG id (Mgmt)",
             "Value": {
@@ -120,6 +135,9 @@
         },
         "BastionSg": {
             "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "EFSUser": {
+            "Type": "String"
         },
         "InfraDockerVolSize": {
             "Default": "25",
@@ -647,7 +665,6 @@
         },
 {% set rotator = rotator + 1 %}
 {% endfor %}
-
         "CFNKeys": {
             "Properties": {
                 "UserName": {
@@ -655,6 +672,102 @@
                 }
             },
             "Type": "AWS::IAM::AccessKey"
+        },
+        "EFSIngress": {
+            "Properties": {
+                "FromPort": "2049",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "EFSSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "2049"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "EFSKeys": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "EFSUserName"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+{% for idx in range(1, 4) %}
+        "EFSMountTarget": {
+            "Properties": {
+                "FileSystemId": {
+                    "Ref": "EFSService"
+                },
+                "SubnetId": {
+                    "Ref": "ServicesCommonSubnet{{ idx }}"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "EFSSGCommon"
+                    }
+                ]
+            },
+            "Type": "AWS::EFS::MountTarget"
+        },
+{% endfor %}
+        "EFSService": {
+            "Properties": {},
+            "Type": "AWS::EFS::FileSystem"
+        },
+        "EFSSGCommon": {
+            "Properties": {
+                "GroupDescription": "EFS",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_efs_sg_common"
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "EFSUserName": {
+            "Properties": {
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Sid": "VisualEditor1",
+                                    "Effect": "Allow",
+                                    "Action": "elasticfilesystem:*",
+                                    "Resource": { "Fn::Join" : [ "", [ "arn:aws:elasticfilesystem:::file-system/", { "Ref": "EFSService" } ] ] }
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "accessclusterefs"
+                    }
+                ],
+                "UserName": {
+                    "Ref": "EFSUser"
+                }
+            },
+            "Type": "AWS::IAM::User"
         },
         "ElasticApiMgmt": {
             "Properties": {
@@ -3063,6 +3176,26 @@
                 "ToPort": {
                     "Ref": "MasterApiPort"
                 }
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressEFSCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "EFSSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": 2049 ,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": 2049
             },
             "Type": "AWS::EC2::SecurityGroupEgress"
         },
