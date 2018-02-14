@@ -2641,14 +2641,14 @@
                 },
                 "GroupId": {
                     "Fn::GetAtt": [
-                        "MasterIntElbSG",
+                        "MasterSG",
                         "GroupId"
                     ]
                 },
                 "IpProtocol": "tcp",
                 "SourceSecurityGroupId": {
                     "Fn::GetAtt": [
-                        "MasterSG",
+                        "MasterIntElbSG",
                         "GroupId"
                     ]
                 },
@@ -3015,6 +3015,54 @@
                 },
                 "IpProtocol": "-1",
                 "ToPort": "53"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressExtElbCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterExtElbSG",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressIntElbCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "MasterIntElbSG",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": {
+                    "Ref": "MasterApiPort"
+                },
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": {
+                    "Ref": "MasterApiPort"
+                }
             },
             "Type": "AWS::EC2::SecurityGroupEgress"
         },
