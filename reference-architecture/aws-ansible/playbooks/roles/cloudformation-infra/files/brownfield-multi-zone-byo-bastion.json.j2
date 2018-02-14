@@ -300,11 +300,11 @@
         }
     },
     "Resources": {
-      {% set rotator = 1 %}
-      {% for idx in range(1, app_node_mgmt_count|int + 1) %}
-      {% if rotator == 4 %}
-        {% set rotator = 1 %}
-      {% endif %}
+{% set rotator = 1 %}
+{% for idx in range(1, app_node_mgmt_count|int + 1) %}
+{% if rotator == 4 %}
+{% set rotator = 1 %}
+{% endif %}
         "AppNodeMgmt{{ '%02d' % idx }}": {
             "DependsOn": [
                 "NodeInstanceProfile"
@@ -413,14 +413,14 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-      {% set rotator = rotator + 1 %}
-      {% endfor %}
+{% set rotator = rotator + 1 %}
+{% endfor %}
 
-      {% set rotator = 1 %}
-      {% for idx in range(1, app_node_private_count|int + 1) %}
-      {% if rotator == 4 %}
-        {% set rotator = 1 %}
-      {% endif %}
+{% set rotator = 1 %}
+{% for idx in range(1, app_node_private_count|int + 1) %}
+{% if rotator == 4 %}
+{% set rotator = 1 %}
+{% endif %}
         "AppNodePrivate{{ '%02d' % idx }}": {
             "DependsOn": [
                 "NodeInstanceProfile"
