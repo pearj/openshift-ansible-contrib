@@ -7,6 +7,27 @@
                 "Ref": "BastionSg"
             }
         },
+        "EFSFSId": {
+            "Description": "The filesystem ID of the EFS service",
+            "Value": {
+                "Ref": "EFSService"
+            }
+        },
+        "EFSUserAccessId": {
+            "Description": "AWSAccessKeyId of EFS user",
+            "Value": {
+                "Ref": "EFSKeys"
+            }
+        },
+        "EFSUserSecretKey": {
+            "Description": "AWSSecretKey of EFS user",
+            "Value": {
+                "Fn::GetAtt": [
+                    "EFSKeys",
+                    "SecretAccessKey"
+                ]
+            }
+        },
         "InfraSGIdMgmt": {
             "Description": "Infra Node SG id (Mgmt)",
             "Value": {
@@ -67,24 +88,6 @@
                 ]
             }
         },
-        "PrivateSubnet1": {
-            "Description": "Private Subnet 1",
-            "Value": {
-                "Ref": "PrivateSubnet1"
-            }
-        },
-        "PrivateSubnet2": {
-            "Description": "Private Subnet 2",
-            "Value": {
-                "Ref": "PrivateSubnet2"
-            }
-        },
-        "PrivateSubnet3": {
-            "Description": "Private Subnet 3",
-            "Value": {
-                "Ref": "PrivateSubnet3"
-            }
-        },
         "S3Bucket": {
             "Description": "Name of S3 bucket",
             "Value": {
@@ -120,16 +123,24 @@
         },
         "ADLoadBalancerSGName": {
             "Default": "sg-7905b01d",
-            "Type": "String"
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "ADLoadBalancerZoneID": {
             "Default": "Z1GM3OXH4ZPM65",
-            "Type": "String"
+            "Type": "AWS::Route53::HostedZone::Id"
         },
         "AmiId": {
             "Type": "AWS::EC2::Image::Id"
         },
-        "AppNodeInstanceType": {
+        "AppNodeInstanceTypeMgmt": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "AppNodeInstanceTypePrivate": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "AppNodeInstanceTypePublic": {
             "Default": "t2.medium",
             "Type": "String"
         },
@@ -137,26 +148,21 @@
             "Type": "String"
         },
         "BastionSg": {
+            "Type": "AWS::EC2::SecurityGroup::Id"
+        },
+        "EFSUser": {
             "Type": "String"
         },
-        "InfraDockerVolSize": {
-            "Default": "25",
-            "Type": "String"
-        },
-        "InfraDockerVolType": {
-            "Default": "gp2",
-            "Type": "String"
-        },
-        "InfraInstanceType": {
+        "InfraInstanceTypeMgmt": {
             "Default": "t2.medium",
             "Type": "String"
         },
-        "InfraRootVolSize": {
-            "Default": "50",
+        "InfraInstanceTypePrivate": {
+            "Default": "t2.medium",
             "Type": "String"
         },
-        "InfraRootVolType": {
-            "Default": "gp2",
+        "InfraInstanceTypePublic": {
+            "Default": "t2.medium",
             "Type": "String"
         },
         "KeyName": {
@@ -240,41 +246,23 @@
         "NodeUserData": {
             "Type": "String"
         },
-        "PrivateSubnet1": {
-            "Type": "String"
-        },
-        "PrivateSubnet2": {
-            "Type": "String"
-        },
-        "PrivateSubnet3": {
-            "Type": "String"
-        },
         "ProxyLoadBalancerDNSName": {
             "Default": "internal-proxies-350025294.ap-southeast-2.elb.amazonaws.com",
             "Type": "String"
         },
         "ProxyLoadBalancerSGName": {
             "Default": "sg-c131b6a7",
-            "Type": "String"
+            "Type": "AWS::EC2::SecurityGroup::Id"
         },
         "ProxyLoadBalancerZoneID": {
             "Default": "Z1GM3OXH4ZPM65",
-            "Type": "String"
+            "Type": "AWS::Route53::HostedZone::Id"
         },
         "PublicHostedZone": {
-            "Type": "String"
-        },
-        "PublicSubnet1": {
-            "Type": "String"
-        },
-        "PublicSubnet2": {
-            "Type": "String"
-        },
-        "PublicSubnet3": {
-            "Type": "String"
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "Route53HostedZone": {
-            "Type": "String"
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "S3BucketName": {
             "Type": "String"
@@ -287,15 +275,56 @@
             "Type": "String"
         },
         "Vpc": {
-            "Type": "String"
+            "Type": "AWS::EC2::VPC::Id"
         },
-        "VpcName": {
-            "Default": "ose-on-aws",
-            "Type": "String"
+        "ServicesCommonSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "ServicesCommonSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "ServicesCommonSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "MasterSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "MasterSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "MasterSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePublicSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePublicSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePublicSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePrivateSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePrivateSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodePrivateSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodeMgmtSubnet1": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodeMgmtSubnet2": {
+            "type": "AWS::EC2::Subnet::Id"
+        },
+        "NodeMgmtSubnet3": {
+            "type": "AWS::EC2::Subnet::Id"
         }
     },
     "Resources": {
-                          "AppNodeMgmt01": {
+        "AppNodeMgmt01": {
             "DependsOn": [
                 "NodeInstanceProfile"
             ],
@@ -345,7 +374,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypeMgmt"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -365,7 +394,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "NodeMgmtSubnet1"
                 },
                 "Tags": [
                     {
@@ -403,7 +432,7 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-                          "AppNodeMgmt02": {
+        "AppNodeMgmt02": {
             "DependsOn": [
                 "NodeInstanceProfile"
             ],
@@ -453,7 +482,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypeMgmt"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -473,7 +502,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "NodeMgmtSubnet2"
                 },
                 "Tags": [
                     {
@@ -511,8 +540,8 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-            
-                          "AppNodePrivate01": {
+
+        "AppNodePrivate01": {
             "DependsOn": [
                 "NodeInstanceProfile"
             ],
@@ -562,7 +591,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -582,7 +611,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "NodePrivateSubnet1"
                 },
                 "Tags": [
                     {
@@ -620,7 +649,7 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-              "AppNodePrivate02": {
+        "AppNodePrivate02": {
             "DependsOn": [
                 "NodeInstanceProfile"
             ],
@@ -670,7 +699,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -690,7 +719,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "NodePrivateSubnet2"
                 },
                 "Tags": [
                     {
@@ -728,7 +757,7 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-              "AppNodePrivate03": {
+        "AppNodePrivate03": {
             "DependsOn": [
                 "NodeInstanceProfile"
             ],
@@ -778,7 +807,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -798,7 +827,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet3"
+                    "Ref": "NodePrivateSubnet3"
                 },
                 "Tags": [
                     {
@@ -887,7 +916,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePublic"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -907,7 +936,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "NodePublicSubnet1"
                 },
                 "Tags": [
                     {
@@ -995,7 +1024,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePublic"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -1015,7 +1044,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "NodePublicSubnet2"
                 },
                 "Tags": [
                     {
@@ -1053,7 +1082,6 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-
         "CFNKeys": {
             "Properties": {
                 "UserName": {
@@ -1061,6 +1089,132 @@
                 }
             },
             "Type": "AWS::IAM::AccessKey"
+        },
+        "EFSIngress": {
+            "Properties": {
+                "FromPort": "2049",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "EFSSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "ToPort": "2049"
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        },
+        "EFSKeys": {
+            "Properties": {
+                "UserName": {
+                    "Ref": "EFSUserName"
+                }
+            },
+            "Type": "AWS::IAM::AccessKey"
+        },
+        "EFSMountTarget": {
+            "Properties": {
+                "FileSystemId": {
+                    "Ref": "EFSService"
+                },
+                "SubnetId": {
+                    "Ref": "ServicesCommonSubnet1"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "EFSSGCommon"
+                    }
+                ]
+            },
+            "Type": "AWS::EFS::MountTarget"
+        },
+        "EFSMountTarget": {
+            "Properties": {
+                "FileSystemId": {
+                    "Ref": "EFSService"
+                },
+                "SubnetId": {
+                    "Ref": "ServicesCommonSubnet2"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "EFSSGCommon"
+                    }
+                ]
+            },
+            "Type": "AWS::EFS::MountTarget"
+        },
+        "EFSMountTarget": {
+            "Properties": {
+                "FileSystemId": {
+                    "Ref": "EFSService"
+                },
+                "SubnetId": {
+                    "Ref": "ServicesCommonSubnet3"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "EFSSGCommon"
+                    }
+                ]
+            },
+            "Type": "AWS::EFS::MountTarget"
+        },
+        "EFSService": {
+            "Properties": {},
+            "Type": "AWS::EFS::FileSystem"
+        },
+        "EFSSGCommon": {
+            "Properties": {
+                "GroupDescription": "EFS",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ose_efs_sg_common"
+                    },
+                    {
+                        "Key": "KubernetesCluster",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "EFSUserName": {
+            "Properties": {
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Sid": "VisualEditor1",
+                                    "Effect": "Allow",
+                                    "Action": "elasticfilesystem:*",
+                                    "Resource": { "Fn::Join" : [ "", [ "arn:aws:elasticfilesystem:::file-system/", { "Ref": "EFSService" } ] ] }
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "accessclusterefs"
+                    }
+                ],
+                "UserName": {
+                    "Ref": "EFSUser"
+                }
+            },
+            "Type": "AWS::IAM::User"
         },
         "ElasticApiMgmt": {
             "Properties": {
@@ -1679,10 +1833,10 @@
                 ],
                 "Subnets": [
                                         {
-                        "Ref": "PublicSubnet1"
+                        "Ref": "ServicesCommonSubnet1"
                     },
                                         {
-                        "Ref": "PublicSubnet2"
+                        "Ref": "ServicesCommonSubnet2"
                     },
                                     ],
                 "Tags": [
@@ -1737,13 +1891,13 @@
                 ],
                 "Subnets": [
                                         {
-                        "Ref": "PublicSubnet1"
+                        "Ref": "ServicesCommonSubnet1"
                     },
                                         {
-                        "Ref": "PublicSubnet2"
+                        "Ref": "ServicesCommonSubnet2"
                     },
                                         {
-                        "Ref": "PublicSubnet3"
+                        "Ref": "ServicesCommonSubnet3"
                     },
                                     ],
                 "Tags": [
@@ -1795,10 +1949,10 @@
                 ],
                 "Subnets": [
                                         {
-                        "Ref": "PublicSubnet1"
+                        "Ref": "ServicesCommonSubnet1"
                     },
                                         {
-                        "Ref": "PublicSubnet2"
+                        "Ref": "ServicesCommonSubnet2"
                     },
                                     ],
                 "Tags": [
@@ -2065,7 +2219,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypeMgmt"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2091,7 +2245,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "NodeMgmtSubnet1"
                 },
                 "Tags": [
                     {
@@ -2176,7 +2330,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypeMgmt"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2202,7 +2356,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "NodeMgmtSubnet2"
                 },
                 "Tags": [
                     {
@@ -2288,7 +2442,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2314,7 +2468,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "NodePrivateSubnet1"
                 },
                 "Tags": [
                     {
@@ -2399,7 +2553,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2425,7 +2579,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "NodePrivateSubnet2"
                 },
                 "Tags": [
                     {
@@ -2510,7 +2664,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2536,7 +2690,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet3"
+                    "Ref": "NodePrivateSubnet3"
                 },
                 "Tags": [
                     {
@@ -2622,7 +2776,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePublic"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2648,7 +2802,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "NodePublicSubnet1"
                 },
                 "Tags": [
                     {
@@ -2733,7 +2887,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePublic"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2759,7 +2913,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "NodePublicSubnet2"
                 },
                 "Tags": [
                     {
@@ -3047,7 +3201,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet1"
+                    "Ref": "MasterSubnet1"
                 },
                 "Tags": [
                     {
@@ -3166,7 +3320,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet2"
+                    "Ref": "MasterSubnet2"
                 },
                 "Tags": [
                     {
@@ -3285,7 +3439,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "PrivateSubnet3"
+                    "Ref": "MasterSubnet3"
                 },
                 "Tags": [
                     {
@@ -3382,13 +3536,13 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "PublicSubnet1"
+                        "Ref": "ServicesCommonSubnet1"
                     },
                     {
-                        "Ref": "PublicSubnet2"
+                        "Ref": "ServicesCommonSubnet2"
                     },
                     {
-                        "Ref": "PublicSubnet3"
+                        "Ref": "ServicesCommonSubnet3"
                     }
                 ],
                 "Tags": [
@@ -3643,13 +3797,13 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "PrivateSubnet1"
+                        "Ref": "MasterSubnet1"
                     },
                     {
-                        "Ref": "PrivateSubnet2"
+                        "Ref": "MasterSubnet2"
                     },
                     {
-                        "Ref": "PrivateSubnet3"
+                        "Ref": "MasterSubnet3"
                     }
                 ],
                 "Tags": [
@@ -3904,6 +4058,26 @@
                 "ToPort": {
                     "Ref": "MasterApiPort"
                 }
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
+        },
+        "NodeEgressEFSCommon": {
+            "Properties": {
+                "DestinationSecurityGroupId": {
+                    "Fn::GetAtt": [
+                        "EFSSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "FromPort": 2049 ,
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": 2049
             },
             "Type": "AWS::EC2::SecurityGroupEgress"
         },
