@@ -153,14 +153,6 @@
         "EFSUser": {
             "Type": "String"
         },
-        "InfraDockerVolSize": {
-            "Default": "25",
-            "Type": "String"
-        },
-        "InfraDockerVolType": {
-            "Default": "gp2",
-            "Type": "String"
-        },
         "InfraInstanceTypeMgmt": {
             "Default": "t2.medium",
             "Type": "String"
@@ -171,14 +163,6 @@
         },
         "InfraInstanceTypePublic": {
             "Default": "t2.medium",
-            "Type": "String"
-        },
-        "InfraRootVolSize": {
-            "Default": "50",
-            "Type": "String"
-        },
-        "InfraRootVolType": {
-            "Default": "gp2",
             "Type": "String"
         },
         "KeyName": {
@@ -290,53 +274,12 @@
         "S3User": {
             "Type": "String"
         },
+        "SubnetCreationCFStackName": {
+            "Description": "CloudFormation stack that created the VPC for the cluster",
+            "Type": "String"
+        },
         "Vpc": {
             "Type": "AWS::EC2::VPC::Id"
-        },
-        "ServicesCommonSubnet1": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "ServicesCommonSubnet2": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "ServicesCommonSubnet3": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "MasterSubnet1": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "MasterSubnet2": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "MasterSubnet3": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodePublicSubnet1": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodePublicSubnet2": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodePublicSubnet3": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodePrivateSubnet1": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodePrivateSubnet2": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodePrivateSubnet3": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodeMgmtSubnet1": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodeMgmtSubnet2": {
-            "type": "AWS::EC2::Subnet::Id"
-        },
-        "NodeMgmtSubnet3": {
-            "type": "AWS::EC2::Subnet::Id"
         }
     },
     "Resources": {
@@ -415,7 +358,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "NodeMgmtSubnet{{ rotator }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodeMgmtSubnet{{ rotator }}"}}]
                 },
                 "Tags": [
                     {
@@ -531,7 +474,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "NodePrivateSubnet{{ rotator }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePrivateSubnet{{ rotator }}"}}]
                 },
                 "Tags": [
                     {
@@ -647,7 +590,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "NodePublicSubnet{{ rotator }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePublicSubnet{{ rotator }}"}}]
                 },
                 "Tags": [
                     {
@@ -730,7 +673,7 @@
                     "Ref": "EFSService"
                 },
                 "SubnetId": {
-                    "Ref": "ServicesCommonSubnet{{ idx }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}}]
                 },
                 "SecurityGroups": [
                     {
@@ -1461,7 +1404,7 @@
                 "Subnets": [
                     {% for idx in range(1, infra_node_private_count|int + 1) if not idx > 3 %}
                     {
-                        "Ref": "ServicesCommonSubnet{{ idx }}"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}}]
                     },
                     {% endfor %}
                 ],
@@ -1514,7 +1457,7 @@
                 "Subnets": [
                     {% for idx in range(1, infra_node_public_count|int + 1) if not idx > 3 %}
                     {
-                        "Ref": "ServicesCommonSubnet{{ idx }}"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}}]
                     },
                     {% endfor %}
                 ],
@@ -1813,7 +1756,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "NodeMgmtSubnet{{ rotator }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodeMgmtSubnet{{ idx }}"}}]
                 },
                 "Tags": [
                     {
@@ -1932,7 +1875,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "NodePrivateSubnet{{ rotator }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePrivateSubnet{{ rotator }}"}}]
                 },
                 "Tags": [
                     {
@@ -2051,7 +1994,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "NodePublicSubnet{{ rotator }}"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePublicSubnet{{ rotator }}"}}]
                 },
                 "Tags": [
                     {
@@ -2341,7 +2284,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "MasterSubnet1"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet1"}}]
                 },
                 "Tags": [
                     {
@@ -2460,7 +2403,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "MasterSubnet2"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet2"}}]
                 },
                 "Tags": [
                     {
@@ -2579,7 +2522,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "MasterSubnet3"
+                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet3"}}]
                 },
                 "Tags": [
                     {
@@ -2676,13 +2619,13 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "ServicesCommonSubnet1"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet1"}}]
                     },
                     {
-                        "Ref": "ServicesCommonSubnet2"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet2"}}]
                     },
                     {
-                        "Ref": "ServicesCommonSubnet3"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet3"}}]
                     }
                 ],
                 "Tags": [
@@ -2937,13 +2880,13 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "MasterSubnet1"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet1"}}]
                     },
                     {
-                        "Ref": "MasterSubnet2"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet2"}}]
                     },
                     {
-                        "Ref": "MasterSubnet3"
+                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet3"}}]
                     }
                 ],
                 "Tags": [

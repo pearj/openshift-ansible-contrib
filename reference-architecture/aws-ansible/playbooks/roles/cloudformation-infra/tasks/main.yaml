@@ -169,6 +169,7 @@
 - name: Setup variables for Brownfield Multi Zone Infrastructure with existing bastion
   set_fact: remote_template_filename="{{ stack_name }}-brownfield-multi-zone-byo-bastion-{{lookup('pipe','date +%Y%m%d%H%M%S')}}.json"
   when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+
 - name: Upload template for Brownfield Multi Zone Infrastructure with existing bastion to s3
   aws_s3: # Multi-zone template is too big to upload directly
     bucket: cf-templates-1gw9kbnafe5zv-ap-southeast-2
@@ -176,30 +177,7 @@
     src: "roles/cloudformation-infra/files/{{ stack_name }}-brownfield-multi-zone-byo-bastion.json"
     mode: put
   when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
-- name: Retrieve VPC IDs from the CF template
-  cloudformation_facts:
-    stack_name: "{{ vpc_creation_cf_template }}"
-    region: "{{ region }}"
-  register: vpc_stack
-  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
-- name: Set VPC facts
-  set_fact:
-    services_common_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['ServicesCommonSubnet1'] }}"
-    services_common_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['ServicesCommonSubnet2'] }}"
-    services_common_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['ServicesCommonSubnet3'] }}"
-    master_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['MasterSubnet1'] }}"
-    master_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['MasterSubnet2'] }}"
-    master_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['MasterSubnet3'] }}"
-    node_public_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePublicSubnet1'] }}"
-    node_public_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePublicSubnet2'] }}"
-    node_public_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePublicSubnet3'] }}"
-    node_private_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePrivateSubnet1'] }}"
-    node_private_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePrivateSubnet2'] }}"
-    node_private_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePrivateSubnet3'] }}"
-    node_mgmt_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodeMgmtSubnet1'] }}"
-    node_mgmt_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodeMgmtSubnet2'] }}"
-    node_mgmt_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodeMgmtSubnet3'] }}"
-  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+
 - name: Create Brownfield Multi Zone Infrastructure with existing bastion from uploaded s3 template
   cloudformation:
     stack_name: "{{ stack_name }}"
@@ -247,21 +225,7 @@
       NodeDockerVolType: gp2
       S3BucketName: "{{ s3_bucket_name }}"
       S3User: "{{ s3_username }}"
-      ServicesCommonSubnet1: "{{ services_common_subnet1 }}"
-      ServicesCommonSubnet2: "{{ services_common_subnet2 }}"
-      ServicesCommonSubnet3: "{{ services_common_subnet3 }}"
-      MasterSubnet1: "{{ master_subnet1 }}"
-      MasterSubnet2: "{{ master_subnet2 }}"
-      MasterSubnet3: "{{ master_subnet3 }}"
-      NodePublicSubnet1: "{{ node_public_subnet1 }}"
-      NodePublicSubnet2: "{{ node_public_subnet2 }}"
-      NodePublicSubnet3: "{{ node_public_subnet3 }}"
-      NodePrivateSubnet1: "{{ node_private_subnet1 }}"
-      NodePrivateSubnet2: "{{ node_private_subnet2 }}"
-      NodePrivateSubnet3: "{{ node_private_subnet3 }}"
-      NodeMgmtSubnet1: "{{ node_mgmt_subnet1 }}"
-      NodeMgmtSubnet2: "{{ node_mgmt_subnet2 }}"
-      NodeMgmtSubnet3: "{{ node_mgmt_subnet3 }}"
+      SubnetCreationCFStackName: "{{ subnet_creation_cf_stack_name }}"
     tags:
       clusterid: "{{ stack_name }}"
   when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
