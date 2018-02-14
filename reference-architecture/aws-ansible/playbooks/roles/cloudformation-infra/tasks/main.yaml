@@ -228,7 +228,9 @@
       MasterEmptyVolSize: "5"
       MasterEmptyVolType: gp2
       MasterUserData: "{{ lookup('file', 'user_data_master.yml') | b64encode }}"
-      InfraInstanceType: "{{ node_instance_type }}"
+      InfraInstanceTypeMgmt: "{{ infra_instance_type_mgmt }}"
+      InfraInstanceTypePrivate: "{{ infra_instance_type_private }}"
+      InfraInstanceTypePublic: "{{ infra_instance_type_public }}"
       InfraRootVolSize: "50"
       InfraRootVolType: gp2
       InfraDockerVolSize: "{{ docker_storage }}"
@@ -236,7 +238,9 @@
       NodeEmptyVolSize: "{{ emptydir_storage }}"
       NodeEmptyVolType: gp2
       NodeUserData: "{{ lookup('file', 'user_data_node.yml') | b64encode }}"
-      AppNodeInstanceType: "{{ app_instance_type }}"
+      AppNodeInstanceTypeMgmt: "{{ app_instance_type_mgmt }}"
+      AppNodeInstanceTypePrivate: "{{ app_instance_type_private }}"
+      AppNodeInstanceTypePublic: "{{ app_instance_type_public }}"
       NodeRootVolSize: "50"
       NodeRootVolType: gp2
       NodeDockerVolSize: "{{ docker_storage }}"

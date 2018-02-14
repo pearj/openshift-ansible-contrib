@@ -132,7 +132,15 @@
         "AmiId": {
             "Type": "AWS::EC2::Image::Id"
         },
-        "AppNodeInstanceType": {
+        "AppNodeInstanceTypeMgmt": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "AppNodeInstanceTypePrivate": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "AppNodeInstanceTypePublic": {
             "Default": "t2.medium",
             "Type": "String"
         },
@@ -153,7 +161,15 @@
             "Default": "gp2",
             "Type": "String"
         },
-        "InfraInstanceType": {
+        "InfraInstanceTypeMgmt": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "InfraInstanceTypePrivate": {
+            "Default": "t2.medium",
+            "Type": "String"
+        },
+        "InfraInstanceTypePublic": {
             "Default": "t2.medium",
             "Type": "String"
         },
@@ -379,7 +395,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypeMgmt"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -495,7 +511,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -611,7 +627,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "AppNodeInstanceType"
+                    "Ref": "AppNodeInstanceTypePublic"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -1771,7 +1787,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypeMgmt"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -1890,7 +1906,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePrivate"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
@@ -2009,7 +2025,7 @@
                     "Ref": "AmiId"
                 },
                 "InstanceType": {
-                    "Ref": "InfraInstanceType"
+                    "Ref": "InfraInstanceTypePublic"
                 },
                 "KeyName": {
                     "Ref": "KeyName"
