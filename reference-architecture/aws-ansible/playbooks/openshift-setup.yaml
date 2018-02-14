@@ -73,3 +73,8 @@
     openshift_logging_es_nodeselector: {"role":"infra"}
     openshift_logging_kibana_nodeselector: {"role":"infra"}
     openshift_logging_curator_nodeselector: {"role":"infra"}
+
+    # efs
+    openshift_provisioners_efs_aws_access_key_id: "{{ efsuser_id }}"
+    openshift_provisioners_efs_aws_secret_access_key: "{{ efsuser_secret }}"
+    openshift_provisioners_efs_fsid: "{{ efsfs_id }}"

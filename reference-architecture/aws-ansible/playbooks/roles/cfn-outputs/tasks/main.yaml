@@ -10,3 +10,9 @@
     s3user_id: "{{ stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['S3UserAccessId'] }}"
     s3user_secret: "{{ stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['S3UserSecretKey'] }}"
     s3_bucket_name: "{{ stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['S3Bucket'] }}"
+
+- name: Set efs facts
+  set_fact:
+    efsuser_id: "{{ stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['EFSUserAccessId'] }}"
+    efsuser_secret: "{{ stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['EFSUserSecretKey'] }}"
+    efsfs_id: "{{ stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['EFSFSId'] }}"
