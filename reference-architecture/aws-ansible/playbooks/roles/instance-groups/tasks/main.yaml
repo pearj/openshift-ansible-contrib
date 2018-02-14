@@ -33,6 +33,7 @@
     openshift_node_labels:
       role: infra
       KubernetesCluster: "{{ stack_name }}"
+      security-zone: '{{ hostvars[item].ec2_tag_openshift-security-zone | default("private") }}'
   with_items: "{{ groups['tag_openshift_role_infra'] }}"
   when:
     - hostvars[item]['ec2_tag_KubernetesCluster'] == stack_name
@@ -44,6 +45,7 @@
     openshift_node_labels:
       role: app
       KubernetesCluster: "{{ stack_name }}"
+      security-zone: '{{ hostvars[item].ec2_tag_openshift-security-zone | default("private") }}'
   with_items: "{{ groups['tag_openshift_role_app'] }}"
   when:
     - hostvars[item]['ec2_tag_KubernetesCluster'] == stack_name
@@ -67,6 +69,7 @@
     openshift_node_labels:
       role: "{{ node_type }}"
       KubernetesCluster: "{{ stack_name }}"
+      security-zone: '{{ security_zone | default("private") }}'
   with_items: "{{ groups.tag_provision_node | default([]) }}"
   when:
     - new_node_stack is defined and node_type != "gluster" and hostvars[item]['ec2_tag_aws_cloudformation_stack_name'] == new_node_stack and add_node is defined and add_node == "yes"

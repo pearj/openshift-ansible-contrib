@@ -14,6 +14,8 @@ import sys
               show_default=True)
 @click.option('--openshift-sdn', default='redhat/openshift-ovs-multitenant', help='OpenShift SDN (redhat/openshift-ovs-subnet, redhat/openshift-ovs-multitenant, or other supported SDN)',
               show_default=True)
+@click.option('--security-zone', default='private', help='Cluster security zone (added as "security-zone" node label)',
+              show_default=True)
 
 ### AWS/EC2 options
 @click.option('--region', default='us-east-1', help='ec2 region',
@@ -83,6 +85,7 @@ def launch_refarch_env(region=None,
                     infra_elb_name=None,
                     existing_stack=None,
                     openshift_sdn=None,
+                    security_zone='private',
                     use_cloudformation_facts=False,
                     verbose=0):
 
@@ -143,6 +146,9 @@ def launch_refarch_env(region=None,
   deploy_glusterfs = "false"
   add_node = "yes"
 
+  if security_zone is None:
+    security_zone = click.prompt('Security zone for node?')
+
   # Display information to the user about their choices
   if use_cloudformation_facts:
       click.echo('Configured values:')
@@ -165,6 +171,7 @@ def launch_refarch_env(region=None,
       click.echo('\tnode_type: %s' % node_type)
       click.echo('\texisting_stack: %s' % existing_stack)
       click.echo('\topenshit_sdn: %s' % openshift_sdn)
+      click.echo('\security_zone: %s' % security_zone)
       click.echo('\tSubnets, Security Groups, and IAM Roles will be gather from the CloudFormation')
       click.echo("")
   else:
@@ -192,6 +199,7 @@ def launch_refarch_env(region=None,
       click.echo('\tinfra_elb_name: %s' % infra_elb_name)
       click.echo('\texisting_stack: %s' % existing_stack)
       click.echo('\topenshift_sdn: %s' % openshift_sdn)
+      click.echo('\security_zone: %s' % openshift_sdn)
       click.echo("")
 
   if not no_confirm:
@@ -241,6 +249,7 @@ def launch_refarch_env(region=None,
         deploy_glusterfs=%s \
         new_node_stack=%s \
         stack_name=%s \
+        security_zone=%s \
         openshift_sdn=%s \' %s' % (region,
                         ami,
                         keypair,
@@ -263,6 +272,7 @@ def launch_refarch_env(region=None,
                         deploy_glusterfs,
                         new_node_stack,
                         existing_stack,
+                        security_zone,
                         openshift_sdn,
                         playbook)
 
@@ -294,6 +304,7 @@ def launch_refarch_env(region=None,
         deploy_glusterfs=%s \
         new_node_stack=%s \
         stack_name=%s \
+        security_zone=%s \
         openshift_sdn=%s \' %s' % (region,
                         ami,
                         keypair,
@@ -319,6 +330,7 @@ def launch_refarch_env(region=None,
                         deploy_glusterfs,
                         new_node_stack,
                         existing_stack,
+                        security_zone,
                         openshift_sdn,
                         playbook)
 
