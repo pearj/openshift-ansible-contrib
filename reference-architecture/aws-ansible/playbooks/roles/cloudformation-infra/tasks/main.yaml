@@ -176,6 +176,30 @@
     src: "roles/cloudformation-infra/files/{{ stack_name }}-brownfield-multi-zone-byo-bastion.json"
     mode: put
   when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+- name: Retrieve VPC IDs from the CF template
+  cloudformation_facts:
+    stack_name: "{{ vpc_creation_cf_template }}"
+    region: "{{ region }}"
+  register: vpc_stack
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
+- name: Set VPC facts
+  set_fact:
+    services_common_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['ServicesCommonSubnet1'] }}"
+    services_common_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['ServicesCommonSubnet2'] }}"
+    services_common_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['ServicesCommonSubnet3'] }}"
+    master_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['MasterSubnet1'] }}"
+    master_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['MasterSubnet2'] }}"
+    master_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['MasterSubnet3'] }}"
+    node_public_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePublicSubnet1'] }}"
+    node_public_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePublicSubnet2'] }}"
+    node_public_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePublicSubnet3'] }}"
+    node_private_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePrivateSubnet1'] }}"
+    node_private_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePrivateSubnet2'] }}"
+    node_private_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodePrivateSubnet3'] }}"
+    node_mgmt_subnet1: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodeMgmtSubnet1'] }}"
+    node_mgmt_subnet2: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodeMgmtSubnet2'] }}"
+    node_mgmt_subnet3: "{{ vpc_stack['ansible_facts']['cloudformation'][stack_name]['stack_outputs']['NodeMgmtSubnet3'] }}"
+  when: create_vpc == "no" and byo_bastion == "yes" and multi_zone == "yes"
 - name: Create Brownfield Multi Zone Infrastructure with existing bastion from uploaded s3 template
   cloudformation:
     stack_name: "{{ stack_name }}"
