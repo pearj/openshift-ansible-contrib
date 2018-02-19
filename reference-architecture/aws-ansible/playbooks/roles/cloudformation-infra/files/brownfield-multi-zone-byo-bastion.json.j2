@@ -127,7 +127,7 @@
         },
         "ADLoadBalancerZoneID": {
             "Default": "Z1GM3OXH4ZPM65",
-            "Type": "AWS::Route53::HostedZone::Id"
+            "Type": "String"
         },
         "AmiId": {
             "Type": "AWS::EC2::Image::Id"
@@ -256,13 +256,13 @@
         },
         "ProxyLoadBalancerZoneID": {
             "Default": "Z1GM3OXH4ZPM65",
-            "Type": "AWS::Route53::HostedZone::Id"
+            "Type": "String"
         },
         "PublicHostedZone": {
-            "Type": "AWS::EC2::AvailabilityZone::Name"
+            "Type": "String"
         },
         "Route53HostedZone": {
-            "Type": "AWS::EC2::AvailabilityZone::Name"
+            "Type": "String"
         },
         "S3BucketName": {
             "Type": "String"
@@ -357,9 +357,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodeMgmtSubnet{{ rotator }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodeMgmtSubnet{{ rotator }}"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -388,6 +386,10 @@
                     {
                         "Key": "openshift-security-zone",
                         "Value": "mgmt"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -473,9 +475,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePrivateSubnet{{ rotator }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePrivateSubnet{{ rotator }}"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -504,6 +504,10 @@
                     {
                         "Key": "openshift-security-zone",
                         "Value": "private"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -589,9 +593,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePublicSubnet{{ rotator }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePublicSubnet{{ rotator }}"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -620,6 +622,10 @@
                     {
                         "Key": "openshift-security-zone",
                         "Value": "public"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -667,14 +673,12 @@
             "Type": "AWS::IAM::AccessKey"
         },
 {% for idx in range(1, 4) %}
-        "EFSMountTarget": {
+        "EFSMountTarget{{ idx }}": {
             "Properties": {
                 "FileSystemId": {
                     "Ref": "EFSService"
                 },
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}},
                 "SecurityGroups": [
                     {
                         "Ref": "EFSSGCommon"
@@ -717,9 +721,18 @@
                         "PolicyDocument": {
                             "Statement": [
                                 {
-                                    "Sid": "VisualEditor1",
                                     "Effect": "Allow",
-                                    "Action": "elasticfilesystem:*",
+                                    "Action": [
+                                        "ec2:DescribeAvailabilityZones",
+                                        "ec2:DescribeNetworkInterfaceAttribute",
+                                        "ec2:DescribeNetworkInterfaces",
+                                        "ec2:DescribeSecurityGroups",
+                                        "ec2:DescribeSubnets",
+                                        "ec2:DescribeVpcAttribute",
+                                        "ec2:DescribeVpcs",
+                                        "elasticfilesystem:Describe*",
+                                        "kms:ListAliases"
+                                    ],
                                     "Resource": { "Fn::Join" : [ "", [ "arn:aws:elasticfilesystem:::file-system/", { "Ref": "EFSService" } ] ] }
                                 }
                             ],
@@ -1350,9 +1363,7 @@
                 ],
                 "Subnets": [
                     {% for idx in range(1, infra_node_mgmt_count|int + 1) if not idx > 3 %}
-                    {
-                        "Ref": "ServicesCommonSubnet{{ idx }}"
-                    },
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}},
                     {% endfor %}
                 ],
                 "Tags": [
@@ -1403,9 +1414,7 @@
                 ],
                 "Subnets": [
                     {% for idx in range(1, infra_node_private_count|int + 1) if not idx > 3 %}
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}}]
-                    },
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}},
                     {% endfor %}
                 ],
                 "Tags": [
@@ -1456,9 +1465,7 @@
                 ],
                 "Subnets": [
                     {% for idx in range(1, infra_node_public_count|int + 1) if not idx > 3 %}
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}}]
-                    },
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet{{ idx }}"}},
                     {% endfor %}
                 ],
                 "Tags": [
@@ -1755,9 +1762,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodeMgmtSubnet{{ idx }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodeMgmtSubnet{{ idx }}"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -1786,6 +1791,10 @@
                     {
                         "Key": "openshift-security-zone",
                         "Value": "mgmt"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -1874,9 +1883,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePrivateSubnet{{ rotator }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePrivateSubnet{{ rotator }}"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -1905,6 +1912,10 @@
                     {
                         "Key": "openshift-security-zone",
                         "Value": "private"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -1993,9 +2004,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePublicSubnet{{ rotator }}"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-NodePublicSubnet{{ rotator }}"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -2024,6 +2033,10 @@
                     {
                         "Key": "openshift-security-zone",
                         "Value": "public"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -2283,9 +2296,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet1"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet1"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -2310,6 +2321,10 @@
                     {
                         "Key": "openshift-role",
                         "Value": "master"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -2402,9 +2417,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet2"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet2"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -2429,6 +2442,10 @@
                     {
                         "Key": "openshift-role",
                         "Value": "master"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -2521,9 +2538,7 @@
                         ]
                     }
                 ],
-                "SubnetId": {
-                    "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet3"}}]
-                },
+                "SubnetId": {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet3"}},
                 "Tags": [
                     {
                         "Key": "Name",
@@ -2548,6 +2563,10 @@
                     {
                         "Key": "openshift-role",
                         "Value": "master"
+                    },
+                    {
+                        "Key": "Backup",
+                        "Value": "true"
                     }
                 ],
                 "UserData": {
@@ -2556,7 +2575,7 @@
             },
             "Type": "AWS::EC2::Instance"
         },
-        "MasterEgressADCommon": {
+        "MasterEgressAD": {
             "Properties": {
                 "DestinationSecurityGroupId": {
                     "Ref": "ADLoadBalancerSGName"
@@ -2618,15 +2637,9 @@
                     }
                 ],
                 "Subnets": [
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet1"}}]
-                    },
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet2"}}]
-                    },
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet3"}}]
-                    }
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet1"}},
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet2"}},
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-ServicesCommonSubnet3"}}
                 ],
                 "Tags": [
                     {
@@ -2879,15 +2892,9 @@
                     }
                 ],
                 "Subnets": [
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet1"}}]
-                    },
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet2"}}]
-                    },
-                    {
-                        "Ref": [{"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet3"}}]
-                    }
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet1"}},
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet2"}},
+                    {"Fn::ImportValue" : {"Fn::Sub" : "${SubnetCreationCFStackName}-MasterSubnet3"}}
                 ],
                 "Tags": [
                     {
@@ -3058,6 +3065,21 @@
                 }
             },
             "Type": "AWS::EC2::SecurityGroup"
+        },
+        "NodeEgressAWSServicesCommon": {
+            "Properties": {
+                "CidrIp": "10.2.0.0/16",
+                "FromPort": "443",
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "NodeSGCommon",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "ToPort": "443"
+            },
+            "Type": "AWS::EC2::SecurityGroupEgress"
         },
         "NodeEgressCommon": {
             "Properties": {
